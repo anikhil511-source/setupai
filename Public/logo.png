@@ -1,1 +1,9 @@
-
+<img 
+  src="/logo.png" 
+  alt="The Setup Intelligence"
+  style={{
+    height: '100px',
+    marginBottom: '20px',
+    filter: 'drop-shadow(0 4px 8px rgba(0, 188, 212, 0.3))'
+  }}
+/>
