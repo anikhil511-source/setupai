@@ -94,7 +94,7 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer className={styles.footer}>
-        <p>© 2024 The Setup Intelligence. All rights reserved.</p>
+        <p>© 2026 The Setup Intelligence. All rights reserved.</p>
       </footer>
     </div>
   );
