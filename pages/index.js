@@ -14,14 +14,19 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {/* Header */}
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1>SetupAI</h1>
-          <p>Free Financial Tools for Every Indian</p>
-        </div>
-      </header>
+<header className={styles.header}>
+  <div className={styles.headerContent}>
+    <img 
+      src="/logo.png" 
+      alt="The Setup Intelligence Logo"
+      style={{height: '80px', marginBottom: '20px'}}
+    />
+    <h1>The Setup Intelligence</h1>
+    <p>AI-Powered Financial Tools for Smart Investors</p>
+  </div>
+</header>
 
+  
       {/* Navigation Tabs */}
       <nav className={styles.nav}>
         <button
