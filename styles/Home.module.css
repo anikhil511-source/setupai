@@ -1,104 +1,133 @@
+/* ================================================
+   GLOBAL STYLES
+   ================================================ */
+
 .container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #00BCD4 0%, #00897B 100%);
+  background-color: #f8f9fa;
 }
 
+/* ================================================
+   HEADER STYLES
+   ================================================ */
+
 .header {
-  background: linear-gradient(135deg, #00BCD4 0%, #00897B 100%);
+  background: linear-gradient(135deg, #00bcd4 0%, #00897b 100%);
   color: white;
   padding: 40px 20px;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
 }
 
-.headerContent h1 {
-  margin: 0;
-  font-size: 2.5em;
+.header h1 {
+  font-size: 2.5rem;
   font-weight: 700;
+  margin: 0 0 10px 0;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 
-.headerContent p {
-  margin: 10px 0 0 0;
-  font-size: 1.1em;
+.header p {
+  font-size: 1rem;
+  margin: 0;
   opacity: 0.95;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 
-.nav {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  padding: 20px;
-  flex-wrap: wrap;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+.header img {
+  height: 80px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 4px 8px rgba(0, 188, 212, 0.3));
 }
 
-.tabButton {
-  padding: 12px 20px;
-  border: 2px solid #e0e0e0;
-  background: white;
-  color: #333;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
+/* ================================================
+   GRID VIEW STYLES
+   ================================================ */
 
-.tabButton:hover {
-  border-color: #00BCD4;
-  color: #00BCD4;
-  transform: translateY(-2px);
-}
-
-.tabButton.active {
-  background: linear-gradient(135deg, #00BCD4 0%, #00897B 100%);
-  color: white;
-  border-color: transparent;
-}
-
-.main {
-  display: flex;
+.gridContainer {
   flex: 1;
   padding: 20px;
-  gap: 20px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   width: 100%;
 }
 
-.calculatorContainer {
-  flex: 1;
-  min-width: 0;
+.toolsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  padding: 20px;
 }
 
-.adSpace {
-  width: 250px;
-  background: white;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  height: fit-content;
+.toolCard {
+  padding: 24px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  background-color: #FF6B6B;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2px dashed #ccc;
-  text-align: center;
-  color: #999;
+  min-height: 160px;
+}
+
+.toolCard:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.1);
+}
+
+.toolCard:active {
+  transform: scale(0.98);
+}
+
+.toolIcon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.toolCard h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 8px 0;
+  font-family: 'Poppins', 'Inter', sans-serif;
+}
+
+.toolCard p {
   font-size: 12px;
+  opacity: 0.9;
+  margin: 4px 0 0 0;
+  font-family: 'Poppins', 'Inter', sans-serif;
+  line-height: 1.4;
+}
+
+/* ================================================
+   CALCULATOR CONTAINER STYLES
+   ================================================ */
+
+.calculatorContainer {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .calculator {
-  background: white;
-  border-radius: 15px;
-  padding: 40px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  animation: slideIn 0.3s ease;
+  animation: fadeIn 0.3s ease;
 }
 
-@keyframes slideIn {
+@keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -110,205 +139,466 @@
 }
 
 .calculator h2 {
-  margin: 0 0 10px 0;
-  color: #333;
   font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #333;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 
+.calculator > p {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 30px 0;
+  font-family: 'Poppins', 'Inter', sans-serif;
+}
+
+.calculator h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 25px 0 15px 0;
+  font-family: 'Poppins', 'Inter', sans-serif;
+}
+
+/* ================================================
+   INPUT GROUP STYLES
+   ================================================ */
+
 .inputGroup {
-  margin-bottom: 25px;
+  margin-bottom: 24px;
 }
 
 .inputGroup label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #333;
   font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 
 .inputGroup input[type="number"],
-.inputGroup input[type="range"],
+.inputGroup input[type="text"],
 .inputGroup select {
   width: 100%;
   padding: 12px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
+  font-size: 16px;
+  font-family: 'Poppins', 'Inter', sans-serif;
   margin-bottom: 8px;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .inputGroup input[type="number"]:focus,
-.inputGroup input[type="range"]:focus,
+.inputGroup input[type="text"]:focus,
 .inputGroup select:focus {
   outline: none;
-  border-color: #00BCD4;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #00bcd4;
+  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
 }
 
 .inputGroup input[type="range"] {
-  padding: 0;
+  width: 100%;
   height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #00bcd4, #00897b);
+  outline: none;
+  margin: 8px 0;
   cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.value {
-  display: inline-block;
-  background: #1A1A1A;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 600;
-  color: #667eea;
+.inputGroup input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00bcd4;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.inputGroup input[type="range"]::-webkit-slider-thumb:hover {
+  width: 24px;
+  height: 24px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.inputGroup input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00bcd4;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.inputGroup span {
+  display: block;
   font-size: 14px;
+  color: #00bcd4;
+  font-weight: 600;
+  margin-top: 4px;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 
-.results {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-top: 30px;
-}
+/* ================================================
+   RESULT BOX STYLES
+   ================================================ */
 
 .resultBox {
-  background: linear-gradient(135deg, #00BCD4 0%, #00897B 100%);
-  color: white;
+  margin-top: 30px;
   padding: 20px;
+  background: linear-gradient(135deg, #00bcd4 0%, #00897b 100%);
   border-radius: 12px;
+  color: white;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .resultBox {
+    grid-template-columns: 1fr;
+  }
+}
+
+.resultItem {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 16px;
+  border-radius: 8px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.resultBox p {
-  margin: 0 0 10px 0;
-  font-size: 13px;
+.resultItem span {
+  display: block;
+  font-size: 12px;
   opacity: 0.9;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  margin-bottom: 8px;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 
-.resultBox h3 {
-  margin: 0;
-  font-size: 24px;
+.resultItem strong {
+  display: block;
+  font-size: 22px;
   font-weight: 700;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
+
+/* ================================================
+   BACK BUTTON STYLES
+   ================================================ */
+
+.backButton {
+  background: white;
+  border: 2px solid #00bcd4;
+  color: #00bcd4;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', 'Inter', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backButton:hover {
+  background: #00bcd4;
+  color: white;
+  transform: translateX(-4px);
+}
+
+.backButton:active {
+  transform: translateX(-2px);
+}
+
+/* ================================================
+   FOOTER STYLES
+   ================================================ */
 
 .footer {
-  background: #222;
-  color: white;
-  padding: 30px 20px;
+  background-color: #f5f5f5;
+  padding: 20px;
   text-align: center;
-  margin-top: 40px;
+  color: #666;
+  font-size: 14px;
+  margin-top: auto;
+  border-top: 1px solid #e0e0e0;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 
 .footer p {
-  margin: 0 0 15px 0;
-  font-size: 14px;
-  opacity: 0.9;
+  margin: 0;
 }
 
-.footerLinks {
-  font-size: 13px;
-}
+/* ================================================
+   RESPONSIVE STYLES
+   ================================================ */
 
-.footerLinks a {
-  color: #667eea;
-  text-decoration: none;
-  margin: 0 10px;
-}
-
-.footerLinks a:hover {
-  text-decoration: underline;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .main {
-    flex-direction: column;
+/* Tablet: 768px - 1199px */
+@media (max-width: 1199px) {
+  .toolsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    padding: 16px;
   }
 
-  .adSpace {
-    width: 100%;
-    height: 80px;
+  .header h1 {
+    font-size: 2rem;
   }
 
-  .calculator {
-    padding: 25px;
+  .calculator h2 {
+    font-size: 24px;
   }
 
-  .headerContent h1 {
-    font-size: 2em;
+  .resultBox {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .resultItem strong {
+    font-size: 18px;
   }
 }
 
 @media (max-width: 768px) {
-  .nav {
-    padding: 15px;
-    gap: 8px;
+  .toolsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 12px;
   }
 
-  .tabButton {
-    padding: 10px 15px;
-    font-size: 12px;
+  .toolCard {
+    padding: 16px 12px;
+    min-height: 140px;
   }
 
-  .calculator {
+  .toolIcon {
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+
+  .toolCard h3 {
+    font-size: 14px;
+  }
+
+  .toolCard p {
+    font-size: 11px;
+  }
+
+  .header {
+    padding: 30px 15px;
+    margin-bottom: 20px;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .header p {
+    font-size: 0.9rem;
+  }
+
+  .header img {
+    height: 60px;
+    margin-bottom: 15px;
+  }
+
+  .calculatorContainer {
+    margin: 20px;
     padding: 20px;
+    max-width: calc(100% - 40px);
   }
 
   .calculator h2 {
-    font-size: 22px;
-  }
-
-  .results {
-    grid-template-columns: 1fr;
-  }
-
-  .resultBox h3 {
     font-size: 20px;
   }
 
-  .headerContent h1 {
-    font-size: 1.8em;
+  .calculator > p {
+    font-size: 13px;
   }
 
-  .headerContent p {
-    font-size: 0.95em;
-  }
-}
-
-@media (max-width: 480px) {
-  .header {
-    padding: 25px 15px;
+  .inputGroup {
+    margin-bottom: 18px;
   }
 
-  .headerContent h1 {
-    font-size: 1.5em;
-  }
-
-  .main {
+  .inputGroup input[type="number"],
+  .inputGroup input[type="text"],
+  .inputGroup select {
     padding: 10px;
+    font-size: 14px;
+  }
+
+  .resultBox {
+    grid-template-columns: 1fr;
+    padding: 14px;
     gap: 10px;
   }
 
-  .calculator {
+  .resultItem strong {
+    font-size: 18px;
+  }
+
+  .resultItem span {
+    font-size: 11px;
+  }
+}
+
+/* Mobile: Below 480px */
+@media (max-width: 480px) {
+  .toolsGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .toolCard {
+    padding: 14px 10px;
+    min-height: 120px;
+  }
+
+  .toolIcon {
+    font-size: 32px;
+    margin-bottom: 6px;
+  }
+
+  .toolCard h3 {
+    font-size: 13px;
+    margin: 6px 0;
+  }
+
+  .toolCard p {
+    font-size: 10px;
+  }
+
+  .header {
+    padding: 20px 10px;
+    margin-bottom: 15px;
+  }
+
+  .header h1 {
+    font-size: 1.3rem;
+  }
+
+  .header p {
+    font-size: 0.85rem;
+  }
+
+  .header img {
+    height: 50px;
+    margin-bottom: 10px;
+  }
+
+  .calculatorContainer {
+    margin: 15px;
     padding: 15px;
+    max-width: calc(100% - 30px);
   }
 
   .calculator h2 {
     font-size: 18px;
   }
 
-  .tabButton {
-    flex: 1;
-    min-width: 100px;
+  .calculator > p {
+    font-size: 12px;
+  }
+
+  .inputGroup {
+    margin-bottom: 14px;
+  }
+
+  .inputGroup label {
+    font-size: 13px;
+  }
+
+  .inputGroup input[type="number"],
+  .inputGroup input[type="text"],
+  .inputGroup select {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .resultBox {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .resultItem {
+    padding: 12px;
+  }
+
+  .resultItem strong {
+    font-size: 16px;
+  }
+
+  .resultItem span {
+    font-size: 10px;
+  }
+
+  .backButton {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .footer {
+    font-size: 12px;
+    padding: 15px;
   }
 }
-.header img {
-  max-width: 200px;
-  height: auto;
-  display: block;
-  margin: 0 auto 20px;
-  filter: drop-shadow(0 4px 8px rgba(0, 188, 212, 0.3));
+
+/* ================================================
+   UTILITY CLASSES
+   ================================================ */
+
+.fadeIn {
+  animation: fadeIn 0.3s ease;
+}
+
+/* ================================================
+   SCROLLBAR STYLING
+   ================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00bcd4;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00897b;
+}
+
+/* ================================================
+   PRINT STYLES
+   ================================================ */
+
+@media print {
+  .backButton,
+  .footer {
+    display: none;
+  }
+
+  .resultBox {
+    page-break-inside: avoid;
+  }
 }
