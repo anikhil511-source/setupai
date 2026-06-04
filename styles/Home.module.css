@@ -305,3 +305,10 @@
     min-width: 100px;
   }
 }
+.header img {
+  max-width: 200px;
+  height: auto;
+  display: block;
+  margin: 0 auto 20px;
+  filter: drop-shadow(0 4px 8px rgba(0, 188, 212, 0.3));
+}
