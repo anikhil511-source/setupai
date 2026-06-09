@@ -1,7 +1,10 @@
 export default async function handler(req, res) {
-  const { sentiment } = req.query;
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   try {
+    const { sentiment } = req.query;
     const tursoUrl = process.env.TURSO_URL;
     const tursoToken = process.env.TURSO_TOKEN;
 
@@ -41,11 +44,8 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-
-    // Extract rows from Turso response
     const rows = data.results?.[0]?.rows || [];
 
-    // Transform rows to card objects
     const cards = rows.map((row) => ({
       id: row[0],
       title: row[1],
