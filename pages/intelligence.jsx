@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Card from '@/components/Card';
+import Card from '@/component/components/Card';
 
 export default function Intelligence() {
   const [cards, setCards] = useState([]);
