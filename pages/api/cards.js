@@ -9,19 +9,17 @@ export default async function handler(req, res) {
     const tursoToken = process.env.TURSO_TOKEN;
 
     if (!tursoUrl || !tursoToken) {
-      return res.status(500).json({ error: 'Turso credentials not configured' });
+      return res.status(500).json({ error: 'Database not configured' });
     }
 
-    // Build SQL query with optional sentiment filter
-    let sql = 'SELECT * FROM cards ORDER BY createdAt DESC';
+    let sql = 'SELECT * FROM cards ORDER BY createdAt DESC LIMIT 100';
     const params = [];
 
     if (sentiment && sentiment !== 'All') {
-      sql = 'SELECT * FROM cards WHERE sentiment = ? ORDER BY createdAt DESC';
+      sql = 'SELECT * FROM cards WHERE sentiment = ? ORDER BY createdAt DESC LIMIT 100';
       params.push(sentiment);
     }
 
-    // Call Turso HTTP API
     const response = await fetch(`${tursoUrl}/v1/query`, {
       method: 'POST',
       headers: {
@@ -29,18 +27,13 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        statements: [
-          {
-            q: sql,
-            params: params,
-          },
-        ],
+        statements: [{ q: sql, params }],
       }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      return res.status(response.status).json({ error: errorData.error || 'Database query failed' });
+      const error = await response.json();
+      return res.status(response.status).json({ error: error.error || 'Query failed' });
     }
 
     const data = await response.json();
@@ -66,6 +59,6 @@ export default async function handler(req, res) {
     res.status(200).json(cards);
   } catch (error) {
     console.error('API Error:', error);
-    res.status(500).json({ error: 'Failed to fetch cards', details: error.message });
+    res.status(500).json({ error: 'Failed to fetch cards' });
   }
 }
