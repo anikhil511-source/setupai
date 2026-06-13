@@ -47,24 +47,25 @@ export default async function handler(req, res) {
     const rows = result?.rows || [];
 
     const cards = rows.map((row) => {
-      const v = row.map((cell) => (cell && cell.value !== undefined ? cell.value : cell));
-      return {
-        id: v[0],
-        title: v[1],
-        summary: v[2],
-        ticker: v[3],
-        sector: v[4],
-        sentiment: v[5],
-        confidence: v[6],
-        riskLevel: v[7],
-        recommendation: v[8],
-        analysis: v[9],
-        colorCode: v[10],
-        source: v[11],
-        url: v[12],
-        createdAt: v[13],
-      };
-    });
+  const v = row.map((cell) => (cell && cell.value !== undefined ? cell.value : cell));
+  return {
+    id: v[0],
+    title: v[1],
+    summary: v[2],
+    ticker: v[3],
+    sector: v[4],
+    sentiment: v[5],
+    confidence: v[6],
+    riskLevel: v[7],
+    recommendation: v[8],
+    analysis: v[9],
+    colorCode: v[10],
+    source: v[11],
+    url: v[12],
+    pubDate: v[13],
+    createdAt: v[14],
+  };
+});
 
     res.status(200).json(cards);
   } catch (error) {
