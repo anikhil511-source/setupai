@@ -207,6 +207,7 @@ export default function Home() {
           <div style={s.navLinks}>
             <Link href="/" style={{ ...s.navLink, color: '#fff', fontWeight: 700 }}>Home</Link>
             <Link href="/about" style={s.navLink}>About</Link>
+            <Link href="/tools" style={s.navLink}>Tools</Link>
           </div>
         </div>
 
@@ -414,6 +415,7 @@ export default function Home() {
         <div style={s.footerLinks}>
           <Link href="/" style={s.footerLink}>Home</Link>
           <Link href="/about" style={s.footerLink}>About</Link>
+          <Link href="/tools" style={s.footerLink}>Tools</Link>
         </div>
         <p style={s.disclaimer}>
           Financial news and information for educational purposes only.

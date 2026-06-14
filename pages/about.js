@@ -11,6 +11,7 @@ export default function About() {
         <div style={s.navLinks}>
           <Link href="/" style={s.navLink}>Home</Link>
           <Link href="/about" style={{ ...s.navLink, color: '#fff', fontWeight: 700 }}>About</Link>
+          <Link href="/tools" style={s.navLink}>Tools</Link>
         </div>
       </nav>
 
@@ -93,6 +94,7 @@ export default function About() {
         <div style={s.footerLinks}>
           <Link href="/" style={s.footerLink}>Home</Link>
           <Link href="/about" style={s.footerLink}>About</Link>
+          <Link href="/tools" style={s.footerLink}>Tools</Link>
         </div>
         <p style={s.disclaimer}>
           SetupAI provides financial news and information for educational purposes only.
