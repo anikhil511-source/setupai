@@ -51,6 +51,8 @@ export default function Home() {
   const [tagIndex, setTagIndex] = useState(0);
   const [tagVisible, setTagVisible] = useState(true);
   const [moodOpen, setMoodOpen] = useState(false);
+  const [pendingCards, setPendingCards] = useState(null);  // freshly fetched cards waiting to be shown
+  const [newCount, setNewCount] = useState(0);             // how many are new
 
   // Apply sector + analyst filters (sentiment is already applied via the API fetch)
   const filtered = cards.filter((c) => {
@@ -86,6 +88,37 @@ export default function Home() {
     })();
     return () => { cancelled = true; };
   }, [sentiment]);
+
+  // Background check every 60s — detect new cards without disturbing the grid
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const url = sentiment === 'All' ? '/api/cards' : `/api/cards?sentiment=${sentiment}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!Array.isArray(data)) return;
+        // Count cards whose id isn't in the currently displayed set
+        const shownIds = new Set(cards.map((c) => c.id));
+        const fresh = data.filter((c) => !shownIds.has(c.id));
+        if (fresh.length > 0) {
+          setPendingCards(data);
+          setNewCount(fresh.length);
+        }
+      } catch (e) { /* silent — background check */ }
+    };
+    const id = setInterval(check, 60000);  // every 1 minute
+    return () => clearInterval(id);
+  }, [sentiment, cards]);
+
+  // Load the pending (new) cards into the grid when the user taps the pill
+  const loadNewCards = () => {
+    if (pendingCards) {
+      setCards(pendingCards);
+      setPendingCards(null);
+      setNewCount(0);
+      setPage(0);
+    }
+  };
 
   // Rotating taglines (fade every 3s)
   useEffect(() => {
@@ -183,6 +216,13 @@ export default function Home() {
             <span style={s.tickerDot} />
             <p style={{ ...s.tickerText, opacity: tagVisible ? 1 : 0 }}>{TAGLINES[tagIndex]}</p>
           </div>
+
+          {newCount > 0 && (
+            <button onClick={loadNewCards} style={s.newPill}>
+              <span style={s.newPillDot} />
+              {newCount} new update{newCount > 1 ? 's' : ''} · tap to refresh
+            </button>
+          )}
         </div>
       </section>
 
@@ -382,6 +422,7 @@ export default function Home() {
       </footer>
 
       <style>{`
+        @keyframes saiPulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
         @media (max-width: 860px) {
           .sai-layout { grid-template-columns: 1fr !important; }
           .sai-grid { grid-template-columns: 1fr 1fr !important; }
@@ -491,6 +532,10 @@ const s = {
   tickerRow: { margin: '14px 0 0', height: 24, display: 'flex', alignItems: 'center', gap: 10 },
   tickerDot: { display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#00C896', flexShrink: 0 },
   tickerText: { fontSize: 15, color: '#C8E9DF', margin: 0, fontWeight: 500, transition: 'opacity 0.4s ease' },
+  newPill: { display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 16, background: '#00C896',
+             border: 'none', padding: '8px 15px', borderRadius: 20, cursor: 'pointer', fontFamily: FONT,
+             fontSize: 12, color: '#04342C', fontWeight: 700, boxShadow: '0 2px 10px rgba(0,200,150,0.35)' },
+  newPillDot: { width: 7, height: 7, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'saiPulse 1.6s infinite' },
 
   layout: { display: 'grid', gridTemplateColumns: '150px 1fr 190px', gap: 16, margin: '0 16px 16px', padding: 0 },
   left: {}, center: {}, right: {},
