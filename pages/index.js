@@ -238,47 +238,52 @@ function FullCard({ card, onClose, onPrev, onNext, current, total }) {
   return (
     <div onClick={onClose} style={s.overlay}>
       <div onClick={(e) => e.stopPropagation()} style={{ ...s.modal, border: `1px solid ${t.border}` }}>
-        <button onClick={onClose} style={s.close} aria-label="Close">✕</button>
 
-        {/* Reading progress bar */}
-        <div style={s.progressTrack}>
-          <div style={{ ...s.progressFill, width: `${progressPct}%`, background: t.accent }} />
-        </div>
-        <p style={s.progressLabel}>{current} of {total}</p>
-
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-          <span style={{ ...s.badge, color: t.dark, background: t.boxBg }}>{t.label}</span>
-          {card.ticker && <span style={{ ...s.badge, color: t.dark, background: t.border }}>{card.ticker}</span>}
-          {card.sector && <span style={{ ...s.badge, color: t.strong, background: 'transparent', border: `1px solid ${t.accent}` }}>{card.sector}</span>}
-        </div>
-
-        <h2 style={s.modalTitle}>{card.title || 'Untitled'}</h2>
-        <p style={s.modalSummary}>{card.summary || 'No summary available'}</p>
-
-        <div style={s.metrics}>
-          <Metric t={t} label="Sentiment" value={card.sentiment || 'Neutral'} />
-          <Metric t={t} label="Confidence" value={`${card.confidence || 0}/10`} />
-          <Metric t={t} label="Risk level" value={(card.riskLevel || 'MEDIUM').toUpperCase()} />
-          <Metric t={t} label="Why it matters" value={card.recommendation || '—'} small />
-        </div>
-
-        {card.analysis && (
-          <div style={{ ...s.analysisBox, background: t.boxBg }}>
-            <p style={{ ...s.analysisLabel, color: t.strong }}>ANALYSIS</p>
-            <p style={s.analysisText}>{card.analysis}</p>
+        {/* FIXED TOP — close + progress */}
+        <div style={s.modalTop}>
+          <button onClick={onClose} style={s.close} aria-label="Close">✕</button>
+          <div style={s.progressTrack}>
+            <div style={{ ...s.progressFill, width: `${progressPct}%`, background: t.accent }} />
           </div>
-        )}
-
-        <div style={s.modalFooter}>
-          <span>🕐 {published}</span>
-          {card.url && (
-            <a href={card.url} target="_blank" rel="noopener noreferrer" style={s.sourceLink}>
-              {card.source || 'Source'} ↗
-            </a>
-          )}
+          <p style={s.progressLabel}>{current} of {total}</p>
         </div>
 
-        {/* Navigation buttons — full width, always visible */}
+        {/* SCROLLABLE MIDDLE — content */}
+        <div style={s.modalBody}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+            <span style={{ ...s.badge, color: t.dark, background: t.boxBg }}>{t.label}</span>
+            {card.ticker && <span style={{ ...s.badge, color: t.dark, background: t.border }}>{card.ticker}</span>}
+            {card.sector && <span style={{ ...s.badge, color: t.strong, background: 'transparent', border: `1px solid ${t.accent}` }}>{card.sector}</span>}
+          </div>
+
+          <h2 style={s.modalTitle}>{card.title || 'Untitled'}</h2>
+          <p style={s.modalSummary}>{card.summary || 'No summary available'}</p>
+
+          <div style={s.metrics}>
+            <Metric t={t} label="Sentiment" value={card.sentiment || 'Neutral'} />
+            <Metric t={t} label="Confidence" value={`${card.confidence || 0}/10`} />
+            <Metric t={t} label="Risk level" value={(card.riskLevel || 'MEDIUM').toUpperCase()} />
+            <Metric t={t} label="Why it matters" value={card.recommendation || '—'} small />
+          </div>
+
+          {card.analysis && (
+            <div style={{ ...s.analysisBox, background: t.boxBg }}>
+              <p style={{ ...s.analysisLabel, color: t.strong }}>ANALYSIS</p>
+              <p style={s.analysisText}>{card.analysis}</p>
+            </div>
+          )}
+
+          <div style={s.modalFooter}>
+            <span>🕐 {published}</span>
+            {card.url && (
+              <a href={card.url} target="_blank" rel="noopener noreferrer" style={s.sourceLink}>
+                {card.source || 'Source'} ↗
+              </a>
+            )}
+          </div>
+        </div>
+
+        {/* FIXED BOTTOM — nav buttons always visible */}
         <div style={s.navBar}>
           <button
             onClick={(e) => { e.stopPropagation(); onPrev && onPrev(); }}
@@ -342,24 +347,28 @@ const s = {
 
   overlay: { position: 'fixed', inset: 0, background: 'rgba(40,30,20,0.45)', display: 'flex',
              alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 },
-  modal: { background: '#FFFDF9', borderRadius: 16, padding: 22, maxWidth: 440, width: '100%',
-           maxHeight: '88vh', overflowY: 'auto', position: 'relative', fontFamily: FONT },
-  close: { position: 'absolute', top: 14, right: 14, background: 'rgba(0,0,0,0.06)', border: 'none',
-           width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', fontSize: 13, color: '#444' },
+  modal: { background: '#FFFDF9', borderRadius: 16, maxWidth: 420, width: '100%',
+           maxHeight: '90vh', position: 'relative', fontFamily: FONT,
+           display: 'flex', flexDirection: 'column', overflow: 'hidden' },
+  modalTop: { padding: '16px 22px 0', flexShrink: 0 },
+  modalBody: { padding: '4px 22px', overflowY: 'auto', flex: 1 },
+  close: { position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.06)', border: 'none',
+           width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', fontSize: 13, color: '#444', zIndex: 2 },
   badge: { fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, textTransform: 'uppercase', letterSpacing: 0.3 },
-  modalTitle: { fontSize: 20, fontWeight: 700, color: '#1A2B2E', margin: '0 0 8px', lineHeight: 1.25, letterSpacing: -0.5 },
-  modalSummary: { fontSize: 13, color: '#5C5347', margin: '0 0 16px', lineHeight: 1.55 },
-  metrics: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 },
-  analysisBox: { borderRadius: 10, padding: 12, marginBottom: 16 },
-  analysisLabel: { fontSize: 11, fontWeight: 700, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 0.3 },
-  analysisText: { fontSize: 12.5, color: '#1A1A1A', margin: 0, lineHeight: 1.6 },
-  modalFooter: { paddingTop: 12, borderTop: '0.5px solid #ECE4D6', display: 'flex', alignItems: 'center',
+  modalTitle: { fontSize: 19, fontWeight: 700, color: '#1A2B2E', margin: '0 0 6px', lineHeight: 1.25, letterSpacing: -0.5 },
+  modalSummary: { fontSize: 13, color: '#5C5347', margin: '0 0 14px', lineHeight: 1.5 },
+  metrics: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 },
+  analysisBox: { borderRadius: 10, padding: 11, marginBottom: 14 },
+  analysisLabel: { fontSize: 11, fontWeight: 700, margin: '0 0 5px', textTransform: 'uppercase', letterSpacing: 0.3 },
+  analysisText: { fontSize: 12.5, color: '#1A1A1A', margin: 0, lineHeight: 1.55 },
+  modalFooter: { paddingTop: 10, paddingBottom: 4, borderTop: '0.5px solid #ECE4D6', display: 'flex', alignItems: 'center',
                  justifyContent: 'space-between', fontSize: 12, color: '#A89A82' },
   sourceLink: { color: '#0D5C6E', textDecoration: 'none', fontWeight: 700 },
-  navBar: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 16 },
+  navBar: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 22px 18px', flexShrink: 0,
+            borderTop: '0.5px solid #ECE4D6', background: '#FFFDF9' },
   navBtn: { flex: 1, background: '#0D5C6E', color: '#fff', border: 'none', padding: '12px 16px', borderRadius: 10,
             fontSize: 14, fontWeight: 700, fontFamily: FONT },
   progressTrack: { height: 5, background: '#ECE4D6', borderRadius: 10, overflow: 'hidden', margin: '0 0 6px' },
   progressFill: { height: '100%', borderRadius: 10, transition: 'width 0.3s ease' },
-  progressLabel: { fontSize: 11, color: '#A89A82', fontWeight: 500, margin: '0 0 14px', textAlign: 'right' },
+  progressLabel: { fontSize: 11, color: '#A89A82', fontWeight: 500, margin: '0 0 10px', textAlign: 'right' },
 };
