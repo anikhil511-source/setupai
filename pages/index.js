@@ -50,6 +50,7 @@ export default function Home() {
   const [readIds, setReadIds] = useState(() => new Set());  // session-only "read" tracking
   const [tagIndex, setTagIndex] = useState(0);
   const [tagVisible, setTagVisible] = useState(true);
+  const [moodOpen, setMoodOpen] = useState(false);
 
   // Apply sector + analyst filters (sentiment is already applied via the API fetch)
   const filtered = cards.filter((c) => {
@@ -112,6 +113,36 @@ export default function Home() {
   const hotTopics = [...cards]
     .sort((a, b) => (b.confidence || 0) - (a.confidence || 0))
     .slice(0, 4);
+
+  // Market Mood — % bullish/bearish/neutral over each timeframe, from card dates
+  const moodFor = (days) => {
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    const inRange = cards.filter((c) => {
+      const d = new Date(c.pubDate || c.createdAt).getTime();
+      return !isNaN(d) && d >= cutoff;
+    });
+    const total = inRange.length;
+    if (total === 0) return { bull: 0, bear: 0, neut: 0, total: 0 };
+    let bull = 0, bear = 0, neut = 0;
+    inRange.forEach((c) => {
+      const s = (c.sentiment || 'neutral').toLowerCase();
+      if (s === 'bullish') bull++;
+      else if (s === 'bearish') bear++;
+      else neut++;
+    });
+    return {
+      bull: Math.round((bull / total) * 100),
+      bear: Math.round((bear / total) * 100),
+      neut: Math.round((neut / total) * 100),
+      total,
+    };
+  };
+  const moodTimeframes = [
+    { label: 'Daily', m: moodFor(1) },
+    { label: 'Weekly', m: moodFor(7) },
+    { label: 'Monthly', m: moodFor(30) },
+    { label: 'Yearly', m: moodFor(365) },
+  ];
 
   // Open a card by index, and mark it read (session-only)
   const openCard = (idx) => {
@@ -267,8 +298,51 @@ export default function Home() {
           )}
         </main>
 
-        {/* RIGHT — Hot Topics */}
+        {/* RIGHT — Market Mood + Hot Topics */}
         <aside className="sai-right" style={s.right}>
+
+          {/* Market Mood meter (collapsible) */}
+          <div
+            style={{ ...s.moodBox, borderColor: moodOpen ? '#BFD9D3' : '#ECE4D6' }}
+            onMouseEnter={() => setMoodOpen(true)}
+            onMouseLeave={() => setMoodOpen(false)}
+          >
+            <div style={s.moodHeader} onClick={() => setMoodOpen((v) => !v)}>
+              <span style={s.moodTitle}>📊 Market Mood</span>
+              <span style={{ color: '#0D5C6E', fontSize: 12 }}>{moodOpen ? '▴' : '▾'}</span>
+            </div>
+
+            {moodTimeframes.map((tf, i) => {
+              // Collapsed = only Daily + Weekly (first 2); expanded = all
+              if (!moodOpen && i > 1) return null;
+              return (
+                <div key={tf.label} style={{ marginBottom: i === moodTimeframes.length - 1 ? 0 : 11 }}>
+                  <span style={s.moodLabel}>{tf.label}</span>
+                  <div style={s.moodTrack}>
+                    {tf.m.total === 0 ? (
+                      <div style={{ width: '100%', background: '#F0EADF' }} />
+                    ) : (
+                      <>
+                        <div style={{ width: `${tf.m.bull}%`, background: '#00A37A' }} />
+                        <div style={{ width: `${tf.m.bear}%`, background: '#D85A30' }} />
+                        <div style={{ width: `${tf.m.neut}%`, background: '#E8C57A' }} />
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {moodOpen && (
+              <div style={s.moodLegend}>
+                <span style={{ fontSize: 9, color: '#1D9E75' }}>● Bullish</span>
+                <span style={{ fontSize: 9, color: '#D85A30' }}>● Bearish</span>
+                <span style={{ fontSize: 9, color: '#BA8A30' }}>● Neutral</span>
+              </div>
+            )}
+          </div>
+
+          {/* Hot Topics */}
           <p style={{ ...s.colLabel, color: '#D85A30' }}>🔥 Hot topics</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {hotTopics.length === 0 && <p style={{ fontSize: 11, color: '#A89A82' }}>—</p>}
@@ -296,13 +370,13 @@ export default function Home() {
 
       {/* ---------------- FOOTER ---------------- */}
       <footer style={s.footer}>
-        <span>© {new Date().getFullYear()} SetupAI · setupai.in</span>
+        <span>© {new Date().getFullYear()} <span style={{ fontWeight: 700 }}>setup<span style={{ color: '#00C896' }}>ai</span></span> · setupai.in</span>
         <div style={s.footerLinks}>
           <Link href="/" style={s.footerLink}>Home</Link>
           <Link href="/about" style={s.footerLink}>About</Link>
         </div>
         <p style={s.disclaimer}>
-          SetupAI provides financial news and information for educational purposes only.
+          Financial news and information for educational purposes only.
           Nothing here is investment advice. Always do your own research.
         </p>
       </footer>
@@ -446,6 +520,13 @@ const s = {
   hotItem: { textAlign: 'left', background: '#FFFFFF', borderRadius: 10, padding: 10,
              border: '1px solid #ECE4D6', cursor: 'pointer', fontFamily: FONT },
   hotScore: { fontSize: 9, color: '#00A37A', fontWeight: 700 },
+
+  moodBox: { background: '#fff', border: '1px solid #ECE4D6', borderRadius: 11, padding: 14, marginBottom: 18, cursor: 'pointer' },
+  moodHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  moodTitle: { fontSize: 11, color: '#0D5C6E', fontWeight: 700 },
+  moodLabel: { fontSize: 10, color: '#5C5347', fontWeight: 600, display: 'block', marginBottom: 4 },
+  moodTrack: { height: 7, background: '#F0EADF', borderRadius: 6, overflow: 'hidden', display: 'flex' },
+  moodLegend: { display: 'flex', gap: 10, marginTop: 12, paddingTop: 10, borderTop: '1px solid #F0EADF' },
   hotTitle: { fontSize: 11.5, color: '#3A3228', margin: '3px 0 0', lineHeight: 1.3 },
 
   muted: { fontSize: 13, color: '#A89A82', padding: '20px 0' },
