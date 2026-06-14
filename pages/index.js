@@ -41,6 +41,9 @@ const TAGLINES = [
 export default function Home() {
   const [cards, setCards] = useState([]);
   const [sentiment, setSentiment] = useState('All');
+  const [sectorFilter, setSectorFilter] = useState('All');
+  const [analystOnly, setAnalystOnly] = useState(false);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeIndex, setActiveIndex] = useState(null);  // index of opened card in the visible list
@@ -48,8 +51,21 @@ export default function Home() {
   const [tagIndex, setTagIndex] = useState(0);
   const [tagVisible, setTagVisible] = useState(true);
 
-  // Only show the newest 10 cards in the grid
-  const visibleCards = cards.slice(0, 10);
+  // Apply sector + analyst filters (sentiment is already applied via the API fetch)
+  const filtered = cards.filter((c) => {
+    const sectorOk = sectorFilter === 'All' || (c.sector || '') === sectorFilter;
+    const analystOk = !analystOnly || c.type === 'Analyst Pick';
+    return sectorOk && analystOk;
+  });
+
+  // Paginate into pages of 8
+  const PAGE_SIZE = 8;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const visibleCards = filtered.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
+
+  // Unique sector list for the dropdown (auto-filled from current cards)
+  const sectorOptions = ['All', ...Array.from(new Set(cards.map((c) => c.sector).filter(Boolean))).sort()];
 
   // Fetch cards whenever the filter changes
   useEffect(() => {
@@ -89,7 +105,8 @@ export default function Home() {
     if (c) setReadIds((prev) => (prev.has(c.id) ? prev : new Set(prev).add(c.id)));
   }, [activeIndex]);
 
-  // Only show the newest 10 cards in the grid
+  // Reset to first page whenever any filter changes
+  useEffect(() => { setPage(0); }, [sentiment, sectorFilter, analystOnly]);
 
   // Hot Topics = highest-confidence recent cards
   const hotTopics = [...cards]
@@ -165,15 +182,40 @@ export default function Home() {
               );
             })}
           </div>
-          <p style={{ ...s.colLabel, marginTop: 20, color: '#BFB39C' }}>Sector · soon</p>
-          <p style={{ fontSize: 11, color: '#BFB39C', lineHeight: 1.9, margin: 0 }}>
-            Banking · Energy<br />IT · Pharma · Auto
-          </p>
+          <div style={{ height: 1, background: '#E4DCCE', margin: '16px 0' }} />
+          <p style={{ ...s.colLabel }}>Type</p>
+          <button
+            onClick={() => setAnalystOnly((v) => !v)}
+            style={{
+              ...s.filterBtn,
+              width: '100%',
+              background: analystOnly ? '#0D5C6E' : '#FFFFFF',
+              color: analystOnly ? '#FFFFFF' : '#0D5C6E',
+              fontWeight: analystOnly ? 700 : 600,
+              border: analystOnly ? 'none' : '1px solid #BFD9D3',
+            }}
+          >
+            <span style={{ fontSize: 11 }}>⭐</span> Analyst Picks
+          </button>
         </aside>
 
         {/* CENTER — Grid */}
         <main style={s.center}>
-          <p style={s.colLabel}>Latest · tap to open</p>
+          <div style={s.gridHeader}>
+            <p style={{ ...s.colLabel, margin: 0 }}>Latest · tap to open</p>
+            <div style={s.sectorWrap}>
+              <span style={s.sectorLabel}>Sector:</span>
+              <select
+                value={sectorFilter}
+                onChange={(e) => setSectorFilter(e.target.value)}
+                style={s.sectorSelect}
+              >
+                {sectorOptions.map((sec) => (
+                  <option key={sec} value={sec}>{sec === 'All' ? 'All sectors' : sec}</option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           {loading && <div style={s.muted}>Loading market intelligence…</div>}
           {error && <div style={{ ...s.muted, color: '#F0997B' }}>{error}</div>}
@@ -204,6 +246,23 @@ export default function Home() {
                   </button>
                 );
               })}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!loading && filtered.length > PAGE_SIZE && (
+            <div style={s.pagination}>
+              <button
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+                style={{ ...s.pageBtn, ...(safePage === 0 ? s.pageBtnDisabled : s.pageBtnActive) }}
+              >‹ Prev</button>
+              <span style={s.pageLabel}>Page {safePage + 1} of {totalPages}</span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={safePage >= totalPages - 1}
+                style={{ ...s.pageBtn, ...(safePage >= totalPages - 1 ? s.pageBtnDisabled : s.pageBtnActive) }}
+              >Next ›</button>
             </div>
           )}
         </main>
@@ -362,6 +421,17 @@ const s = {
   layout: { display: 'grid', gridTemplateColumns: '150px 1fr 190px', gap: 16, margin: '0 16px 16px', padding: 0 },
   left: {}, center: {}, right: {},
   colLabel: { fontSize: 10, color: '#A89A82', margin: '0 0 10px', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' },
+
+  gridHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 },
+  sectorWrap: { display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #E4DCCE', borderRadius: 8, padding: '5px 10px' },
+  sectorLabel: { fontSize: 11, color: '#A89A82', fontWeight: 500 },
+  sectorSelect: { border: 'none', background: 'transparent', fontSize: 12, color: '#4A4236', fontWeight: 600, fontFamily: FONT, cursor: 'pointer', outline: 'none' },
+
+  pagination: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginTop: 16 },
+  pageBtn: { border: 'none', fontSize: 12, fontWeight: 700, padding: '8px 16px', borderRadius: 9, fontFamily: FONT },
+  pageBtnActive: { background: '#0D5C6E', color: '#fff', cursor: 'pointer' },
+  pageBtnDisabled: { background: '#ECE4D6', color: '#A89A82', cursor: 'default' },
+  pageLabel: { fontSize: 11, color: '#A89A82', fontWeight: 500 },
 
   filterBtn: { textAlign: 'left', fontSize: 13, padding: '9px 12px', borderRadius: 10, cursor: 'pointer', fontFamily: FONT, transition: 'all 0.15s ease' },
 
