@@ -47,6 +47,9 @@ export default function Home() {
   const [tagIndex, setTagIndex] = useState(0);
   const [tagVisible, setTagVisible] = useState(true);
 
+  // Only show the newest 10 cards in the grid
+  const visibleCards = cards.slice(0, 10);
+
   // Fetch cards whenever the filter changes
   useEffect(() => {
     let cancelled = false;
@@ -78,8 +81,14 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
 
+  // Mark the currently-viewed card as read — covers clicks AND arrow navigation
+  useEffect(() => {
+    if (activeIndex === null) return;
+    const c = visibleCards[activeIndex];
+    if (c) setReadIds((prev) => (prev.has(c.id) ? prev : new Set(prev).add(c.id)));
+  }, [activeIndex]);
+
   // Only show the newest 10 cards in the grid
-  const visibleCards = cards.slice(0, 10);
 
   // Hot Topics = highest-confidence recent cards
   const hotTopics = [...cards]
