@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 // ---- Sentiment theme map (warm cream theme) --------------------------------
 const THEMES = {
@@ -115,11 +116,20 @@ export default function Home() {
     <div style={s.page}>
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
 
+      {/* ---------------- TOP NAV ---------------- */}
+      <nav style={s.nav}>
+        <Link href="/" style={s.logo}>setup<span style={{ color: '#00A37A' }}>ai</span></Link>
+        <div style={s.navLinks}>
+          <Link href="/" style={{ ...s.navLink, color: '#0D5C6E', fontWeight: 700 }}>Home</Link>
+          <Link href="/about" style={s.navLink}>About</Link>
+        </div>
+      </nav>
+
       {/* ---------------- HERO ---------------- */}
       <section style={s.hero}>
         <div style={s.heroBlob} />
         <div style={{ position: 'relative' }}>
-          <p style={s.heroEyebrow}>setupai.in</p>
+          <p style={s.heroLogo}><span style={{ color: '#fff' }}>setup</span><span style={{ color: '#00C896' }}>ai</span></p>
           <h1 style={s.heroTitle}>Market Intelligence, <span style={{ color: '#00C896' }}>Live</span></h1>
           <div style={s.tickerRow}>
             <span style={s.tickerDot} />
@@ -225,6 +235,19 @@ export default function Home() {
         />
       )}
 
+      {/* ---------------- FOOTER ---------------- */}
+      <footer style={s.footer}>
+        <span>© {new Date().getFullYear()} SetupAI · setupai.in</span>
+        <div style={s.footerLinks}>
+          <Link href="/" style={s.footerLink}>Home</Link>
+          <Link href="/about" style={s.footerLink}>About</Link>
+        </div>
+        <p style={s.disclaimer}>
+          SetupAI provides financial news and information for educational purposes only.
+          Nothing here is investment advice. Always do your own research.
+        </p>
+      </footer>
+
       <style>{`
         @media (max-width: 860px) {
           .sai-layout { grid-template-columns: 1fr !important; }
@@ -322,18 +345,24 @@ function Metric({ t, label, value, small }) {
 // ================================ STYLES =====================================
 const FONT = "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif";
 const s = {
-  page: { fontFamily: FONT, background: '#FAF6EF', minHeight: '100vh', padding: 16, boxSizing: 'border-box' },
+  page: { fontFamily: FONT, background: '#FAF6EF', minHeight: '100vh', paddingBottom: 0, boxSizing: 'border-box' },
+
+  nav: { display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+         padding: '16px 24px', background: '#FFFDF9', borderBottom: '1px solid #ECE4D6' },
+  logo: { fontSize: 20, fontWeight: 700, color: '#1A2B2E', textDecoration: 'none', letterSpacing: -0.5 },
+  navLinks: { display: 'flex', gap: 22 },
+  navLink: { fontSize: 14, color: '#5C5347', textDecoration: 'none', fontWeight: 500 },
 
   hero: { background: 'linear-gradient(135deg, #0D5C6E 0%, #0B3038 100%)', padding: '36px 28px',
-          position: 'relative', overflow: 'hidden', borderRadius: 16, border: '1px solid #ECE4D6' },
+          position: 'relative', overflow: 'hidden', margin: 16, borderRadius: 16, border: '1px solid #ECE4D6' },
   heroBlob: { position: 'absolute', top: -40, right: -30, width: 200, height: 200, background: 'rgba(0,163,122,0.16)', borderRadius: '50%' },
-  heroEyebrow: { fontSize: 11, color: '#5DCAA5', margin: '0 0 8px', fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' },
+  heroLogo: { fontSize: 17, fontWeight: 700, margin: '0 0 10px', letterSpacing: -0.5 },
   heroTitle: { fontSize: 34, fontWeight: 700, color: '#fff', margin: 0, letterSpacing: -1, lineHeight: 1.1 },
   tickerRow: { margin: '14px 0 0', height: 24, display: 'flex', alignItems: 'center', gap: 10 },
   tickerDot: { display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#00C896', flexShrink: 0 },
   tickerText: { fontSize: 15, color: '#C8E9DF', margin: 0, fontWeight: 500, transition: 'opacity 0.4s ease' },
 
-  layout: { display: 'grid', gridTemplateColumns: '150px 1fr 190px', gap: 16, marginTop: 16 },
+  layout: { display: 'grid', gridTemplateColumns: '150px 1fr 190px', gap: 16, margin: '16px', padding: 0 },
   left: {}, center: {}, right: {},
   colLabel: { fontSize: 10, color: '#A89A82', margin: '0 0 10px', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' },
 
@@ -380,4 +409,10 @@ const s = {
   progressTrack: { height: 5, background: '#ECE4D6', borderRadius: 10, overflow: 'hidden', margin: '0 0 6px' },
   progressFill: { height: '100%', borderRadius: 10, transition: 'width 0.3s ease' },
   progressLabel: { fontSize: 11, color: '#A89A82', fontWeight: 500, margin: '0 0 10px', textAlign: 'right' },
+
+  footer: { background: '#0D5C6E', color: '#C8E9DF', padding: '28px', textAlign: 'center',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, fontSize: 13 },
+  footerLinks: { display: 'flex', gap: 20 },
+  footerLink: { color: '#9FE1CB', textDecoration: 'none', fontWeight: 500 },
+  disclaimer: { fontSize: 11, color: '#7FB8AB', maxWidth: 520, lineHeight: 1.5, margin: '6px 0 0' },
 };
