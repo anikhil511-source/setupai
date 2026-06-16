@@ -50,7 +50,7 @@ export default function Tools() {
             <span style={{ color: '#BA7517' }}>{open === 'bmi' ? '▴' : '▾'}</span>
           </div>
           <div style={s.bmiTip}>
-            💡 <strong>Why a finance site?</strong> Because health is wealth — a healthy investor is the best investor. Track your body like you track your portfolio. 💪
+            💡 <strong>Why its here?</strong> Because health is wealth — a healthy investor is the best investor. Track your body like you track your portfolio. 💪
           </div>
           {open === 'bmi' && <div style={{ marginTop: 16 }}><BMI /></div>}
         </div>

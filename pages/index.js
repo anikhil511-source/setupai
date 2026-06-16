@@ -51,6 +51,9 @@ export default function Home() {
   const [tagIndex, setTagIndex] = useState(0);
   const [tagVisible, setTagVisible] = useState(true);
   const [moodOpen, setMoodOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);       // mobile hamburger menu
+  const [mobileMoodOpen, setMobileMoodOpen] = useState(false);  // mood dropdown inside menu
+  const [hotOpen, setHotOpen] = useState(false);         // mobile hot-topics bar
   const [pendingCards, setPendingCards] = useState(null);  // freshly fetched cards waiting to be shown
   const [newCount, setNewCount] = useState(0);             // how many are new
 
@@ -173,8 +176,6 @@ export default function Home() {
   const moodTimeframes = [
     { label: 'Daily', m: moodFor(1) },
     { label: 'Weekly', m: moodFor(7) },
-    { label: 'Monthly', m: moodFor(30) },
-    { label: 'Yearly', m: moodFor(365) },
   ];
 
   // Open a card by index, and mark it read (session-only)
@@ -204,11 +205,12 @@ export default function Home() {
         {/* Nav row inside the teal panel */}
         <div style={s.heroNav}>
           <Link href="/" style={s.logo}>setup<span style={{ color: '#00C896' }}>ai</span></Link>
-          <div style={s.navLinks}>
+          <div className="sai-desktop-nav" style={s.navLinks}>
             <Link href="/" style={{ ...s.navLink, color: '#fff', fontWeight: 700 }}>Home</Link>
             <Link href="/about" style={s.navLink}>About</Link>
             <Link href="/tools" style={s.navLink}>Tools</Link>
           </div>
+          <button className="sai-burger" onClick={() => setMenuOpen(true)} style={s.burger} aria-label="Menu">☰</button>
         </div>
 
         <div style={{ position: 'relative' }}>
@@ -227,13 +229,82 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ---------------- MOBILE SLIDE-IN MENU ---------------- */}
+      {menuOpen && (
+        <div className="sai-menu-overlay" style={s.menuOverlay} onClick={() => setMenuOpen(false)}>
+          <div style={s.menuPanel} onClick={(e) => e.stopPropagation()}>
+            <div style={s.menuHeader}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>setup<span style={{ color: '#00C896' }}>ai</span></span>
+              <button onClick={() => setMenuOpen(false)} style={s.menuClose} aria-label="Close">✕</button>
+            </div>
+            <p style={s.menuTagline}>Your edge in the market</p>
+
+            <div style={s.menuLinks}>
+              <Link href="/" style={{ ...s.menuLink, background: '#00A37A', color: '#fff' }}>🏠 Home</Link>
+
+              {/* Market Mood dropdown */}
+              <div style={s.menuMoodWrap}>
+                <button onClick={() => setMobileMoodOpen((v) => !v)} style={{ ...s.menuLink, ...s.menuMoodHead, background: mobileMoodOpen ? '#ECF7F3' : '#fff' }}>
+                  <span>📊 Market Mood</span>
+                  <span style={{ color: '#0D5C6E', fontSize: 12 }}>{mobileMoodOpen ? '▴' : '▾'}</span>
+                </button>
+                {mobileMoodOpen && (
+                  <div style={s.menuMoodBody}>
+                    {moodTimeframes.map((tf) => (
+                      <div key={tf.label} style={{ marginBottom: 9 }}>
+                        <span style={s.moodLabel}>{tf.label}</span>
+                        <div style={s.moodTrack}>
+                          {tf.m.total === 0 ? <div style={{ width: '100%', background: '#F0EADF' }} /> : (
+                            <>
+                              <div style={{ width: `${tf.m.bull}%`, background: '#00A37A' }} />
+                              <div style={{ width: `${tf.m.bear}%`, background: '#D85A30' }} />
+                              <div style={{ width: `${tf.m.neut}%`, background: '#E8C57A' }} />
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    <div style={s.moodLegend}>
+                      <span style={{ fontSize: 9, color: '#1D9E75' }}>● Bullish</span>
+                      <span style={{ fontSize: 9, color: '#D85A30' }}>● Bearish</span>
+                      <span style={{ fontSize: 9, color: '#BA8A30' }}>● Neutral</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <Link href="/tools" style={s.menuLink}>🧰 Tools</Link>
+              <Link href="/about" style={s.menuLink}>ℹ️ About</Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------------- MOBILE HOT TOPICS BAR ---------------- */}
+      <div className="sai-mobile-hotbar" style={s.hotBar}>
+        <button onClick={() => setHotOpen((v) => !v)} style={s.hotBarHead}>
+          <span style={{ fontSize: 12, color: '#D85A30', fontWeight: 700 }}>🔥 Hot Topics <span style={{ color: '#A89A82', fontWeight: 500 }}>({hotTopics.length})</span></span>
+          <span style={{ color: '#D85A30', fontSize: 12 }}>{hotOpen ? '▴' : '▾'}</span>
+        </button>
+        {hotOpen && (
+          <div style={s.hotBarBody}>
+            {hotTopics.map((card) => (
+              <button key={`mhot-${card.id}`} onClick={() => openById(card.id)} style={s.hotItem}>
+                <span style={s.hotScore}>{card.confidence || 0}/10</span>
+                <p style={s.hotTitle}>{card.title || 'Untitled'}</p>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* ---------------- MAIN LAYOUT ---------------- */}
       <div className="sai-layout" style={s.layout}>
 
         {/* LEFT — Filters */}
         <aside className="sai-left" style={s.left}>
           <p style={s.colLabel}>Filter</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="sai-filter-list" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {filters.map((f) => {
               const isActive = sentiment === f;
               const t = f === 'All' ? THEMES.bullish : themeFor(f);
@@ -254,8 +325,8 @@ export default function Home() {
               );
             })}
           </div>
-          <div style={{ height: 1, background: '#E4DCCE', margin: '16px 0' }} />
-          <p style={{ ...s.colLabel }}>Type</p>
+          <div className="sai-type-divider" style={{ height: 1, background: '#E4DCCE', margin: '16px 0' }} />
+          <p className="sai-type-label" style={{ ...s.colLabel }}>Type</p>
           <button
             onClick={() => setAnalystOnly((v) => !v)}
             style={{
@@ -428,7 +499,15 @@ export default function Home() {
         @media (max-width: 860px) {
           .sai-layout { grid-template-columns: 1fr !important; }
           .sai-grid { grid-template-columns: 1fr 1fr !important; }
-          .sai-left, .sai-right { order: 0; }
+          .sai-desktop-nav { display: none !important; }
+          .sai-burger { display: block !important; }
+          .sai-right { display: none !important; }   /* mood+hot now live in menu + top bar */
+          .sai-mobile-hotbar { display: block !important; }
+          .sai-left { order: 0; }
+          /* compact filters: horizontal scrolling row of pills */
+          .sai-filter-list { flex-direction: row !important; flex-wrap: wrap !important; gap: 6px !important; }
+          .sai-filter-list button { flex: none !important; }
+          .sai-type-divider { display: none !important; }
         }
         @media (max-width: 520px) {
           .sai-grid { grid-template-columns: 1fr !important; }
@@ -530,6 +609,22 @@ const s = {
   logo: { fontSize: 19, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: -0.5 },
   navLinks: { display: 'flex', gap: 22 },
   navLink: { fontSize: 14, color: '#9FE1CB', textDecoration: 'none', fontWeight: 500 },
+  burger: { display: 'none', background: 'transparent', border: 'none', color: '#fff', fontSize: 22, cursor: 'pointer', lineHeight: 1 },
+
+  menuOverlay: { position: 'fixed', inset: 0, background: 'rgba(20,15,10,0.45)', zIndex: 2000, display: 'flex', justifyContent: 'flex-end' },
+  menuPanel: { width: '78%', maxWidth: 320, height: '100%', background: 'linear-gradient(180deg, #FFFDF9 0%, #FAF6EF 100%)', boxShadow: '-10px 0 30px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', overflowY: 'auto' },
+  menuHeader: { background: 'linear-gradient(135deg, #0D5C6E 0%, #0B3038 100%)', padding: '18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  menuClose: { background: 'transparent', border: 'none', color: '#9FE1CB', fontSize: 18, cursor: 'pointer' },
+  menuTagline: { fontSize: 11, color: '#0D5C6E', margin: '14px 18px 4px', fontWeight: 500 },
+  menuLinks: { padding: '8px 12px 20px', display: 'flex', flexDirection: 'column', gap: 7 },
+  menuLink: { display: 'flex', alignItems: 'center', gap: 11, padding: '12px 13px', borderRadius: 11, background: '#fff', border: '1px solid #ECE4D6', fontSize: 14, color: '#1A2B2E', fontWeight: 600, textDecoration: 'none', fontFamily: FONT, cursor: 'pointer' },
+  menuMoodWrap: { border: '1px solid #BFD9D3', borderRadius: 11, overflow: 'hidden' },
+  menuMoodHead: { width: '100%', justifyContent: 'space-between', border: 'none', borderRadius: 0 },
+  menuMoodBody: { padding: '12px 13px', background: '#fff' },
+
+  hotBar: { display: 'none', background: '#fff', borderBottom: '1px solid #ECE4D6', margin: '0 16px 12px', borderRadius: 12, border: '1px solid #ECE4D6', overflow: 'hidden' },
+  hotBarHead: { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: '#fff', border: 'none', cursor: 'pointer', fontFamily: FONT },
+  hotBarBody: { padding: '4px 12px 12px', display: 'flex', flexDirection: 'column', gap: 7, background: '#FBF7F0' },
   heroTitle: { fontSize: 32, fontWeight: 700, color: '#fff', margin: 0, letterSpacing: -1, lineHeight: 1.1 },
   tickerRow: { margin: '14px 0 0', height: 24, display: 'flex', alignItems: 'center', gap: 10 },
   tickerDot: { display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#00C896', flexShrink: 0 },
