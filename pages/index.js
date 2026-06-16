@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Head from 'next/head';
 
 // ---- Sentiment theme map (warm cream theme) --------------------------------
 const THEMES = {
@@ -196,6 +197,15 @@ export default function Home() {
 
   return (
     <div style={s.page}>
+      <Head>
+        <title>SetupAI — AI-Powered Market Intelligence for Indian Traders</title>
+        <meta name="description" content="AI-filtered Indian market news that matters — sentiment, analysis, and the stories moving stocks. Cut the noise, catch what counts." />
+        <meta property="og:title" content="SetupAI — AI-Powered Market Intelligence" />
+        <meta property="og:description" content="AI-filtered Indian market news that matters — sentiment, analysis, and the stories moving stocks." />
+        <meta property="og:image" content="/setupai-wide.png" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Head>
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
 
       {/* ---------------- HERO (with nav inside) ---------------- */}

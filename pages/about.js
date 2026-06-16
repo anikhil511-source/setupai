@@ -1,8 +1,18 @@
 import Link from 'next/link';
+import Head from 'next/head';
 
 export default function About() {
   return (
     <div style={s.page}>
+      <Head>
+        <title>About SetupAI — Our Story & Mission</title>
+        <meta name="description" content="Why SetupAI exists: cutting through market noise to build an AI-powered platform where every market participant can learn, grow, and stay ahead." />
+        <meta property="og:title" content="About SetupAI" />
+        <meta property="og:description" content="An AI-powered platform where every market participant can learn, grow, and stay ahead — without the noise." />
+        <meta property="og:image" content="/setupai-wide.png" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Head>
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
 
       {/* Top nav — teal, matches homepage */}

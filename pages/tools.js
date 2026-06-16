@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
+import Head from 'next/head';
 
 // ---------- helpers ----------
 const fmt = (n) => {
@@ -20,6 +21,15 @@ export default function Tools() {
 
   return (
     <div style={s.page}>
+      <Head>
+        <title>Free Finance Calculators — SetupAI Tools</title>
+        <meta name="description" content="Free finance calculators: EMI, FIRE, SIP, ROI, Net Worth and more. Quick, simple tools to plan your money and investments." />
+        <meta property="og:title" content="Free Finance Calculators — SetupAI" />
+        <meta property="og:description" content="EMI, FIRE, SIP, ROI, Net Worth and more — quick, free tools to plan your money." />
+        <meta property="og:image" content="/setupai-wide.png" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Head>
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
 
       {/* Nav */}
