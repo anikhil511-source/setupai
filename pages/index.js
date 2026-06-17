@@ -227,7 +227,8 @@ export default function Home() {
           <div style={s.gridHeader}>
             <p style={{ ...s.colLabel, margin: 0 }}>Latest · tap to open</p>
             
-            <div style={s.filterAnalystRow}>
+            {/* Mobile only: Filter + Analyst row */}
+            <div className="sai-filter-analyst-mobile" style={s.filterAnalystRow}>
               <select value={sentiment} onChange={(e) => setSentiment(e.target.value)} style={s.filterSelect}>
                 <option value="All">◆ All</option>
                 <option value="Bullish">▲ Bullish</option>
@@ -241,6 +242,7 @@ export default function Home() {
               </label>
             </div>
 
+            {/* Search + Sector row (desktop) or (mobile below filter) */}
             <div style={s.searchSectorRow}>
               <input type="text" placeholder="Search ticker, company..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={s.searchInput} />
               
@@ -343,6 +345,7 @@ export default function Home() {
 
       <style>{`
         @keyframes saiPulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        .sai-filter-analyst-mobile { display: flex; }
         @media (max-width: 860px) {
           .sai-layout { grid-template-columns: 1fr !important; }
           .sai-grid { grid-template-columns: 1fr 1fr !important; }
@@ -353,6 +356,9 @@ export default function Home() {
         }
         @media (max-width: 520px) {
           .sai-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+        @media (min-width: 861px) {
+          .sai-filter-analyst-mobile { display: none !important; }
         }
       `}</style>
     </div>
