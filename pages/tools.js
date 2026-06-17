@@ -2,322 +2,264 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 
-// ---------- helpers ----------
-const fmt = (n) => {
-  if (isNaN(n) || !isFinite(n)) return '—';
-  return '₹' + Math.round(n).toLocaleString('en-IN');
-};
-const fmtL = (n) => {
-  if (isNaN(n) || !isFinite(n)) return '—';
-  if (n >= 10000000) return '₹' + (n / 10000000).toFixed(2) + ' Cr';
-  if (n >= 100000) return '₹' + (n / 100000).toFixed(2) + ' L';
-  return '₹' + Math.round(n).toLocaleString('en-IN');
-};
+const FONT = "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif";
 
 export default function Tools() {
-  const [open, setOpen] = useState('emi'); // EMI open by default
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('EMI');
+  const [emi, setEmi] = useState({ principal: 500000, rate: 8, tenure: 12 });
+  const [fire, setFire] = useState({ target: 5000000, annualExpense: 600000, returnRate: 10 });
+  const [sip, setSip] = useState({ monthlyAmount: 10000, annualReturn: 12, years: 20 });
+  const [roi, setRoi] = useState({ principal: 100000, returnAmount: 120000 });
+  const [netWorth, setNetWorth] = useState({ assets: 5000000, liabilities: 1000000 });
+  const [bmi, setBmi] = useState({ weight: 70, height: 175 });
 
-  const toggle = (key) => setOpen((cur) => (cur === key ? '' : key));
+  const calculateEmi = () => {
+    const P = emi.principal;
+    const R = emi.rate / 12 / 100;
+    const N = emi.tenure * 12;
+    if (R === 0) return (P / N).toFixed(2);
+    return ((P * R * Math.pow(1 + R, N)) / (Math.pow(1 + R, N) - 1)).toFixed(2);
+  };
+
+  const calculateFire = () => {
+    const years = emi.target / (fire.annualExpense * (1 + fire.returnRate / 100));
+    return Math.round(years);
+  };
+
+  const calculateSip = () => {
+    const r = sip.annualReturn / 100 / 12;
+    const n = sip.years * 12;
+    return (sip.monthlyAmount * (((Math.pow(1 + r, n) - 1) / r) * (1 + r))).toFixed(0);
+  };
+
+  const calculateRoi = () => {
+    return (((roi.returnAmount - roi.principal) / roi.principal) * 100).toFixed(2);
+  };
+
+  const calculateNetWorth = () => {
+    return (netWorth.assets - netWorth.liabilities).toFixed(0);
+  };
+
+  const calculateBmi = () => {
+    const heightInMeter = bmi.height / 100;
+    return (bmi.weight / (heightInMeter * heightInMeter)).toFixed(1);
+  };
+
+  const getBmiCategory = () => {
+    const bmiValue = parseFloat(calculateBmi());
+    if (bmiValue < 18.5) return 'Underweight';
+    if (bmiValue < 25) return 'Normal';
+    if (bmiValue < 30) return 'Overweight';
+    return 'Obese';
+  };
+
+  const tabs = ['EMI', 'FIRE', 'SIP', 'ROI', 'Net Worth', 'BMI'];
 
   return (
     <div style={s.page}>
       <Head>
-        <title>Free Finance Calculators — SetupAI Tools</title>
-        <meta name="description" content="Free finance calculators: EMI, FIRE, SIP, ROI, Net Worth and more. Quick, simple tools to plan your money and investments." />
-        <meta property="og:title" content="Free Finance Calculators — SetupAI" />
-        <meta property="og:description" content="EMI, FIRE, SIP, ROI, Net Worth and more — quick, free tools to plan your money." />
-        <meta property="og:image" content="/setupai-wide.png" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
+        <title>Financial Calculators — SetupAI Tools</title>
+        <meta name="description" content="Free financial calculators: EMI, FIRE, SIP, ROI, Net Worth, BMI for Indian investors." />
       </Head>
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
 
-      {/* Nav */}
       <nav style={s.nav}>
         <Link href="/" style={s.logo}>setup<span style={{ color: '#00C896' }}>ai</span></Link>
-        <div style={s.navLinks}>
+        <div className="desktop-nav" style={s.navLinks}>
           <Link href="/" style={s.navLink}>Home</Link>
           <Link href="/about" style={s.navLink}>About</Link>
           <Link href="/tools" style={{ ...s.navLink, color: '#fff', fontWeight: 700 }}>Tools</Link>
+          <Link href="/events" style={s.navLink}>Events</Link>
         </div>
+        <button className="burger-menu" onClick={() => setMenuOpen(true)} style={s.burger} aria-label="Menu">☰</button>
       </nav>
 
-      <div style={s.body}>
-        <p style={s.eyebrow}>Free Tools</p>
-        <h1 style={s.h1}>Finance Calculators</h1>
-        <p style={s.sub}>Quick, free tools to plan your money and investments.</p>
+      {menuOpen && (
+        <div className="sai-menu-overlay" style={s.menuOverlay} onClick={() => setMenuOpen(false)}>
+          <div style={s.menuPanel} onClick={(e) => e.stopPropagation()}>
+            <div style={s.menuHeader}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>setup<span style={{ color: '#00C896' }}>ai</span></span>
+              <button onClick={() => setMenuOpen(false)} style={s.menuClose} aria-label="Close">✕</button>
+            </div>
+            <p style={s.menuTagline}>Your edge in the market</p>
 
-        <ToolCard title="🏦 EMI Calculator" k="emi" open={open} toggle={toggle}><EMI /></ToolCard>
-        <ToolCard title="🔥 FIRE Calculator" k="fire" open={open} toggle={toggle}><FIRE /></ToolCard>
-        <ToolCard title="📈 SIP Calculator" k="sip" open={open} toggle={toggle}><SIP /></ToolCard>
-        <ToolCard title="📊 ROI Calculator" k="roi" open={open} toggle={toggle}><ROI /></ToolCard>
-        <ToolCard title="💰 Net Worth Tracker" k="networth" open={open} toggle={toggle}><NetWorth /></ToolCard>
+            <div style={s.menuLinks}>
+              <Link href="/" style={s.menuLink}>🏠 Home</Link>
+              <Link href="/about" style={s.menuLink}>ℹ️ About</Link>
+              <Link href="/tools" style={{ ...s.menuLink, background: '#00A37A', color: '#fff' }}>🧰 Tools</Link>
+              <Link href="/events" style={s.menuLink}>📅 Events Calendar</Link>
+            </div>
+          </div>
+        </div>
+      )}
 
-        {/* BMI — special bonus card */}
-        <div style={s.bmiCard}>
-          <div style={s.toolHead} onClick={() => toggle('bmi')}>
-            <span style={s.toolTitle}>🧘 BMI Calculator <span style={{ fontSize: 11, color: '#BA7517', fontWeight: 600 }}>· bonus tool</span></span>
-            <span style={{ color: '#BA7517' }}>{open === 'bmi' ? '▴' : '▾'}</span>
-          </div>
-          <div style={s.bmiTip}>
-            💡 <strong>Why its here?</strong> Because health is wealth — a healthy investor is the best investor. Track your body like you track your portfolio. 💪
-          </div>
-          {open === 'bmi' && <div style={{ marginTop: 16 }}><BMI /></div>}
+      <div style={s.container}>
+        <h1 style={s.pageTitle}>Financial Calculators</h1>
+        <p style={s.pageSubtitle}>Quick tools to help you plan your finances</p>
+
+        <div style={s.tabContainer}>
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                ...s.tab,
+                ...(activeTab === tab ? s.tabActive : s.tabInactive),
+              }}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <div style={s.toolBox}>
+          {activeTab === 'EMI' && (
+            <div>
+              <h2 style={s.toolTitle}>💳 EMI Calculator</h2>
+              <p style={s.toolDesc}>Calculate your monthly loan EMI</p>
+              <InputRow label="Loan Amount (₹)" value={emi.principal} onChange={(val) => setEmi({ ...emi, principal: val })} />
+              <InputRow label="Interest Rate (%) p.a." value={emi.rate} onChange={(val) => setEmi({ ...emi, rate: val })} />
+              <InputRow label="Loan Tenure (months)" value={emi.tenure} onChange={(val) => setEmi({ ...emi, tenure: val })} />
+              <ResultBox label="Monthly EMI" value={`₹${calculateEmi()}`} />
+              <ResultBox label="Total Amount Payable" value={`₹${(calculateEmi() * emi.tenure * 12).toFixed(0)}`} />
+            </div>
+          )}
+
+          {activeTab === 'FIRE' && (
+            <div>
+              <h2 style={s.toolTitle}>🔥 FIRE Calculator</h2>
+              <p style={s.toolDesc}>Years to achieve financial independence</p>
+              <InputRow label="Target Corpus (₹)" value={fire.target} onChange={(val) => setFire({ ...fire, target: val })} />
+              <InputRow label="Annual Expense (₹)" value={fire.annualExpense} onChange={(val) => setFire({ ...fire, annualExpense: val })} />
+              <InputRow label="Expected Return (%) p.a." value={fire.returnRate} onChange={(val) => setFire({ ...fire, returnRate: val })} />
+              <ResultBox label="Years to FIRE" value={`${Math.round((fire.target / fire.annualExpense))} years`} />
+            </div>
+          )}
+
+          {activeTab === 'SIP' && (
+            <div>
+              <h2 style={s.toolTitle}>📈 SIP Calculator</h2>
+              <p style={s.toolDesc}>Future value of your monthly SIP</p>
+              <InputRow label="Monthly SIP Amount (₹)" value={sip.monthlyAmount} onChange={(val) => setSip({ ...sip, monthlyAmount: val })} />
+              <InputRow label="Expected Annual Return (%)" value={sip.annualReturn} onChange={(val) => setSip({ ...sip, annualReturn: val })} />
+              <InputRow label="Investment Period (years)" value={sip.years} onChange={(val) => setSip({ ...sip, years: val })} />
+              <ResultBox label="Future Value" value={`₹${calculateSip()}`} />
+              <ResultBox label="Total Invested" value={`₹${(sip.monthlyAmount * sip.years * 12).toFixed(0)}`} />
+            </div>
+          )}
+
+          {activeTab === 'ROI' && (
+            <div>
+              <h2 style={s.toolTitle}>📊 ROI Calculator</h2>
+              <p style={s.toolDesc}>Return on investment percentage</p>
+              <InputRow label="Principal Amount (₹)" value={roi.principal} onChange={(val) => setRoi({ ...roi, principal: val })} />
+              <InputRow label="Return Amount (₹)" value={roi.returnAmount} onChange={(val) => setRoi({ ...roi, returnAmount: val })} />
+              <ResultBox label="ROI (%)" value={`${calculateRoi()}%`} />
+            </div>
+          )}
+
+          {activeTab === 'Net Worth' && (
+            <div>
+              <h2 style={s.toolTitle}>💰 Net Worth Calculator</h2>
+              <p style={s.toolDesc}>Your total net worth</p>
+              <InputRow label="Total Assets (₹)" value={netWorth.assets} onChange={(val) => setNetWorth({ ...netWorth, assets: val })} />
+              <InputRow label="Total Liabilities (₹)" value={netWorth.liabilities} onChange={(val) => setNetWorth({ ...netWorth, liabilities: val })} />
+              <ResultBox label="Net Worth" value={`₹${calculateNetWorth()}`} />
+            </div>
+          )}
+
+          {activeTab === 'BMI' && (
+            <div>
+              <h2 style={s.toolTitle}>🏃 BMI Calculator</h2>
+              <p style={s.toolDesc}>Why its here? Because health is wealth — a healthy investor is the best investor. Track your body like you track your portfolio. 💪</p>
+              <InputRow label="Weight (kg)" value={bmi.weight} onChange={(val) => setBmi({ ...bmi, weight: val })} />
+              <InputRow label="Height (cm)" value={bmi.height} onChange={(val) => setBmi({ ...bmi, height: val })} />
+              <ResultBox label="BMI" value={calculateBmi()} />
+              <ResultBox label="Category" value={getBmiCategory()} />
+            </div>
+          )}
+        </div>
+
+        <div style={s.disclaimerBox}>
+          <p style={s.disclaimerText}>
+            ⚠️ <strong>Disclaimer:</strong> These calculators are for educational purposes only. They use simplified formulas and assumptions. Always consult a financial advisor for personalized advice.
+          </p>
         </div>
       </div>
 
-      {/* Footer */}
       <footer style={s.footer}>
         <span>© {new Date().getFullYear()} <span style={{ fontWeight: 700 }}>setup<span style={{ color: '#00C896' }}>ai</span></span> · setupai.in</span>
         <div style={s.footerLinks}>
           <Link href="/" style={s.footerLink}>Home</Link>
           <Link href="/about" style={s.footerLink}>About</Link>
           <Link href="/tools" style={s.footerLink}>Tools</Link>
+          <Link href="/events" style={s.footerLink}>Events</Link>
         </div>
-        <p style={s.disclaimer}>
-          Calculators are for educational purposes only and provide estimates, not financial advice.
-          Always verify with a qualified professional.
-        </p>
+        <p style={s.disclaimer}>Financial news and information for educational purposes only. Nothing here is investment advice.</p>
       </footer>
+
+      <style>{`
+        @media (max-width: 860px) {
+          .desktop-nav { display: none !important; }
+          .burger-menu { display: block !important; }
+        }
+      `}</style>
     </div>
   );
 }
 
-// ---------- reusable expandable card ----------
-function ToolCard({ title, k, open, toggle, children }) {
-  const isOpen = open === k;
+function InputRow({ label, value, onChange }) {
   return (
-    <div style={s.toolCard}>
-      <div style={s.toolHead} onClick={() => toggle(k)}>
-        <span style={s.toolTitle}>{title}</span>
-        <span style={{ color: '#0D5C6E' }}>{isOpen ? '▴' : '▾'}</span>
-      </div>
-      {isOpen && <div style={{ marginTop: 16 }}>{children}</div>}
+    <div style={s.inputRow}>
+      <label style={s.inputLabel}>{label}</label>
+      <input type="number" value={value} onChange={(e) => onChange(parseFloat(e.target.value) || 0)} style={s.inputField} />
     </div>
   );
 }
 
-// ---------- input row ----------
-function Field({ label, value, onChange, suffix }) {
+function ResultBox({ label, value }) {
   return (
-    <div>
-      <label style={s.label}>{label}</label>
-      <div style={s.inputWrap}>
-        <input
-          type="number"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={s.input}
-        />
-        {suffix && <span style={s.suffix}>{suffix}</span>}
-      </div>
+    <div style={s.resultBox}>
+      <p style={s.resultLabel}>{label}</p>
+      <p style={s.resultValue}>{value}</p>
     </div>
   );
 }
 
-function Result({ items }) {
-  return (
-    <div style={s.result}>
-      {items.map((it, i) => (
-        <div key={i} style={{ textAlign: 'center' }}>
-          <p style={s.resultLabel}>{it.label}</p>
-          <p style={{ ...s.resultValue, color: it.color || '#0D5C6E' }}>{it.value}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ---------- EMI ----------
-function EMI() {
-  const [amount, setAmount] = useState(1000000);
-  const [rate, setRate] = useState(9);
-  const [years, setYears] = useState(20);
-  const P = parseFloat(amount) || 0;
-  const r = (parseFloat(rate) || 0) / 12 / 100;
-  const n = (parseFloat(years) || 0) * 12;
-  const emi = r === 0 ? P / n : (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-  const total = emi * n;
-  const interest = total - P;
-  return (
-    <>
-      <div style={s.grid3}>
-        <Field label="Loan amount" value={amount} onChange={setAmount} suffix="₹" />
-        <Field label="Interest rate" value={rate} onChange={setRate} suffix="%" />
-        <Field label="Tenure" value={years} onChange={setYears} suffix="yrs" />
-      </div>
-      <Result items={[
-        { label: 'MONTHLY EMI', value: fmt(emi), color: '#0D5C6E' },
-        { label: 'TOTAL INTEREST', value: fmtL(interest), color: '#D85A30' },
-        { label: 'TOTAL PAYMENT', value: fmtL(total), color: '#00A37A' },
-      ]} />
-    </>
-  );
-}
-
-// ---------- FIRE ----------
-function FIRE() {
-  const [expenses, setExpenses] = useState(50000);
-  const [rate, setRate] = useState(4);
-  const annual = (parseFloat(expenses) || 0) * 12;
-  const corpus = (annual * 100) / (parseFloat(rate) || 1);
-  return (
-    <>
-      <div style={s.grid2}>
-        <Field label="Monthly expenses" value={expenses} onChange={setExpenses} suffix="₹" />
-        <Field label="Safe withdrawal rate" value={rate} onChange={setRate} suffix="%" />
-      </div>
-      <Result items={[
-        { label: 'ANNUAL EXPENSES', value: fmtL(annual), color: '#0D5C6E' },
-        { label: 'FIRE NUMBER', value: fmtL(corpus), color: '#00A37A' },
-      ]} />
-      <p style={s.note}>Your FIRE number is the corpus needed so that withdrawing your safe rate covers expenses indefinitely.</p>
-    </>
-  );
-}
-
-// ---------- SIP ----------
-function SIP() {
-  const [monthly, setMonthly] = useState(10000);
-  const [rate, setRate] = useState(12);
-  const [years, setYears] = useState(10);
-  const P = parseFloat(monthly) || 0;
-  const i = (parseFloat(rate) || 0) / 12 / 100;
-  const n = (parseFloat(years) || 0) * 12;
-  const fv = i === 0 ? P * n : P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
-  const invested = P * n;
-  const returns = fv - invested;
-  return (
-    <>
-      <div style={s.grid3}>
-        <Field label="Monthly investment" value={monthly} onChange={setMonthly} suffix="₹" />
-        <Field label="Expected return" value={rate} onChange={setRate} suffix="%" />
-        <Field label="Time period" value={years} onChange={setYears} suffix="yrs" />
-      </div>
-      <Result items={[
-        { label: 'INVESTED', value: fmtL(invested), color: '#1A2B2E' },
-        { label: 'RETURNS', value: fmtL(returns), color: '#00A37A' },
-        { label: 'TOTAL VALUE', value: fmtL(fv), color: '#0D5C6E' },
-      ]} />
-    </>
-  );
-}
-
-// ---------- ROI ----------
-function ROI() {
-  const [invested, setInvested] = useState(100000);
-  const [final, setFinal] = useState(150000);
-  const [years, setYears] = useState(3);
-  const inv = parseFloat(invested) || 0;
-  const fin = parseFloat(final) || 0;
-  const yr = parseFloat(years) || 0;
-  const roi = inv === 0 ? 0 : ((fin - inv) / inv) * 100;
-  const cagr = inv === 0 || yr === 0 ? 0 : (Math.pow(fin / inv, 1 / yr) - 1) * 100;
-  return (
-    <>
-      <div style={s.grid3}>
-        <Field label="Amount invested" value={invested} onChange={setInvested} suffix="₹" />
-        <Field label="Final value" value={final} onChange={setFinal} suffix="₹" />
-        <Field label="Holding period" value={years} onChange={setYears} suffix="yrs" />
-      </div>
-      <Result items={[
-        { label: 'TOTAL ROI', value: roi.toFixed(1) + '%', color: roi >= 0 ? '#00A37A' : '#D85A30' },
-        { label: 'CAGR', value: cagr.toFixed(1) + '%', color: '#0D5C6E' },
-        { label: 'GAIN', value: fmtL(fin - inv), color: fin - inv >= 0 ? '#00A37A' : '#D85A30' },
-      ]} />
-    </>
-  );
-}
-
-// ---------- Net Worth ----------
-function NetWorth() {
-  const [assets, setAssets] = useState(2000000);
-  const [liabilities, setLiabilities] = useState(800000);
-  const a = parseFloat(assets) || 0;
-  const l = parseFloat(liabilities) || 0;
-  const net = a - l;
-  return (
-    <>
-      <div style={s.grid2}>
-        <Field label="Total assets" value={assets} onChange={setAssets} suffix="₹" />
-        <Field label="Total liabilities" value={liabilities} onChange={setLiabilities} suffix="₹" />
-      </div>
-      <Result items={[
-        { label: 'NET WORTH', value: fmtL(net), color: net >= 0 ? '#00A37A' : '#D85A30' },
-      ]} />
-      <p style={s.note}>Net worth = everything you own (assets) minus everything you owe (liabilities).</p>
-    </>
-  );
-}
-
-// ---------- BMI ----------
-function BMI() {
-  const [height, setHeight] = useState(170);
-  const [weight, setWeight] = useState(70);
-  const h = (parseFloat(height) || 0) / 100;
-  const w = parseFloat(weight) || 0;
-  const bmi = h === 0 ? 0 : w / (h * h);
-  let category = '', color = '#0D5C6E', tip = '';
-  if (bmi > 0) {
-    if (bmi < 18.5) { category = 'Underweight'; color = '#BA7517'; tip = 'Consider a nutritious, calorie-rich diet. A check-up never hurts.'; }
-    else if (bmi < 25) { category = 'Healthy'; color = '#00A37A'; tip = 'Great range! Keep up the balanced diet and regular movement.'; }
-    else if (bmi < 30) { category = 'Overweight'; color = '#D85A30'; tip = 'Small, consistent steps — more movement, mindful eating — go a long way.'; }
-    else { category = 'Obese'; color = '#D85A30'; tip = 'Worth speaking with a doctor about a healthy, sustainable plan.'; }
-  }
-  // Ideal weight range for healthy BMI (18.5–24.9)
-  const lowW = h > 0 ? 18.5 * h * h : 0;
-  const highW = h > 0 ? 24.9 * h * h : 0;
-  return (
-    <>
-      <div style={s.grid2}>
-        <Field label="Height" value={height} onChange={setHeight} suffix="cm" />
-        <Field label="Weight" value={weight} onChange={setWeight} suffix="kg" />
-      </div>
-      <Result items={[
-        { label: 'YOUR BMI', value: bmi > 0 ? bmi.toFixed(1) : '—', color },
-        { label: 'CATEGORY', value: category || '—', color },
-        { label: 'IDEAL WEIGHT', value: h > 0 ? `${Math.round(lowW)}–${Math.round(highW)} kg` : '—', color: '#0D5C6E' },
-      ]} />
-      {tip && <p style={{ ...s.note, color }}>{tip}</p>}
-    </>
-  );
-}
-
-// ---------- styles ----------
-const FONT = "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif";
 const s = {
-  page: { fontFamily: FONT, background: '#FAF6EF', minHeight: '100vh' },
-  nav: { display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-         padding: '16px 28px', background: 'linear-gradient(135deg, #0D5C6E 0%, #0B3038 100%)' },
-  logo: { fontSize: 20, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: -0.5 },
-  navLinks: { display: 'flex', gap: 22 },
-  navLink: { fontSize: 14, color: '#9FE1CB', textDecoration: 'none', fontWeight: 500 },
-
-  body: { maxWidth: 680, margin: '0 auto', padding: '34px 24px 50px' },
-  eyebrow: { fontSize: 11, color: '#00A37A', fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', margin: '0 0 8px' },
-  h1: { fontSize: 28, fontWeight: 700, color: '#1A2B2E', margin: '0 0 6px', letterSpacing: -0.5 },
-  sub: { fontSize: 14, color: '#7A6F5E', margin: '0 0 24px' },
-
-  toolCard: { background: '#fff', border: '1px solid #ECE4D6', borderRadius: 14, padding: '16px 20px', marginBottom: 12 },
-  bmiCard: { background: 'linear-gradient(135deg, #FFF8EC 0%, #fff 100%)', border: '1px solid #F0D9A8', borderRadius: 14, padding: '16px 20px', marginBottom: 12 },
-  toolHead: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' },
-  toolTitle: { fontSize: 16, fontWeight: 700, color: '#1A2B2E' },
-  bmiTip: { background: '#FBF1DC', borderRadius: 9, padding: '11px 13px', marginTop: 12, fontSize: 12, color: '#8A6D2E', lineHeight: 1.5 },
-
-  grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 },
-  grid3: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 },
-  label: { fontSize: 11, color: '#7A6F5E', display: 'block', marginBottom: 5, fontWeight: 500 },
-  inputWrap: { display: 'flex', alignItems: 'center', background: '#FAF6EF', border: '1px solid #E4DCCE', borderRadius: 8, padding: '0 12px' },
-  input: { border: 'none', background: 'transparent', padding: '9px 0', fontSize: 14, color: '#1A2B2E', fontWeight: 600, fontFamily: FONT, width: '100%', outline: 'none' },
-  suffix: { fontSize: 12, color: '#A89A82', fontWeight: 600, marginLeft: 6 },
-
-  result: { background: '#ECF7F3', borderRadius: 10, padding: 16, display: 'flex', justifyContent: 'space-around', gap: 10, flexWrap: 'wrap' },
-  resultLabel: { fontSize: 10, color: '#7A6F5E', margin: '0 0 4px', fontWeight: 600, letterSpacing: 0.3 },
-  resultValue: { fontSize: 17, fontWeight: 700, margin: 0 },
-  note: { fontSize: 12, color: '#7A6F5E', margin: '12px 0 0', lineHeight: 1.5, fontStyle: 'italic' },
-
-  footer: { background: '#0D5C6E', color: '#C8E9DF', padding: '28px', textAlign: 'center',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, fontSize: 13 },
+  page: { fontFamily: FONT, background: '#FAF6EF', minHeight: '100vh', margin: 0, padding: 0 },
+  nav: { background: 'linear-gradient(135deg, #0D5C6E 0%, #0B3038 100%)', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  logo: { fontSize: 18, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: -0.5 },
+  navLinks: { display: 'flex', gap: 24 },
+  navLink: { fontSize: 13, color: '#9FE1CB', textDecoration: 'none', fontWeight: 500 },
+  burger: { display: 'none', background: 'transparent', border: 'none', color: '#fff', fontSize: 20, cursor: 'pointer', lineHeight: 1 },
+  menuOverlay: { position: 'fixed', inset: 0, background: 'rgba(20,15,10,0.45)', zIndex: 2000, display: 'flex', justifyContent: 'flex-end' },
+  menuPanel: { width: '78%', maxWidth: 320, height: '100%', background: 'linear-gradient(180deg, #FFFDF9 0%, #FAF6EF 100%)', boxShadow: '-10px 0 30px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', overflowY: 'auto' },
+  menuHeader: { background: 'linear-gradient(135deg, #0D5C6E 0%, #0B3038 100%)', padding: '18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  menuClose: { background: 'transparent', border: 'none', color: '#9FE1CB', fontSize: 18, cursor: 'pointer' },
+  menuTagline: { fontSize: 11, color: '#0D5C6E', margin: '14px 18px 4px', fontWeight: 500 },
+  menuLinks: { padding: '8px 12px 20px', display: 'flex', flexDirection: 'column', gap: 7 },
+  menuLink: { display: 'flex', alignItems: 'center', gap: 11, padding: '12px 13px', borderRadius: 11, background: '#fff', border: '1px solid #ECE4D6', fontSize: 14, color: '#1A2B2E', fontWeight: 600, textDecoration: 'none', fontFamily: FONT, cursor: 'pointer' },
+  container: { maxWidth: 900, margin: '0 auto', padding: '40px 20px 60px' },
+  pageTitle: { margin: '0 0 8px', fontSize: 36, fontWeight: 700, color: '#333', letterSpacing: -1 },
+  pageSubtitle: { margin: '0 0 24px', fontSize: 16, color: '#666', fontWeight: 500 },
+  tabContainer: { display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' },
+  tab: { padding: '10px 18px', fontSize: 13, fontWeight: 700, border: '1px solid #E4DCCE', borderRadius: 8, cursor: 'pointer', fontFamily: FONT, transition: 'all 0.2s ease' },
+  tabActive: { background: '#0D5C6E', color: '#fff' },
+  tabInactive: { background: '#fff', color: '#333' },
+  toolBox: { background: '#fff', border: '1px solid #E4DCCE', borderRadius: 12, padding: 32 },
+  toolTitle: { margin: '0 0 6px', fontSize: 22, fontWeight: 700, color: '#333' },
+  toolDesc: { margin: '0 0 24px', fontSize: 13, color: '#666', fontWeight: 500 },
+  inputRow: { marginBottom: 18 },
+  inputLabel: { display: 'block', fontSize: 12, fontWeight: 600, color: '#333', marginBottom: 6 },
+  inputField: { width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #E4DCCE', borderRadius: 8, fontFamily: FONT, boxSizing: 'border-box' },
+  resultBox: { background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 10, padding: 16, marginTop: 12 },
+  resultLabel: { margin: '0 0 6px', fontSize: 11, color: '#0D5C6E', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 },
+  resultValue: { margin: 0, fontSize: 24, fontWeight: 700, color: '#0D5C6E' },
+  disclaimerBox: { background: '#FFF3CD', border: '1px solid #FFE69C', borderRadius: 10, padding: 16, marginTop: 32 },
+  disclaimerText: { margin: 0, fontSize: 13, color: '#664D03', lineHeight: 1.6 },
+  footer: { background: '#0D5C6E', color: '#C8E9DF', padding: 28, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, fontSize: 13, marginTop: 60 },
   footerLinks: { display: 'flex', gap: 20 },
   footerLink: { color: '#9FE1CB', textDecoration: 'none', fontWeight: 500 },
   disclaimer: { fontSize: 11, color: '#7FB8AB', maxWidth: 520, lineHeight: 1.5, margin: '6px 0 0' },

@@ -4,20 +4,19 @@ import Head from 'next/head';
 
 const FONT = "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif";
 
-// Static event data
 const EVENTS_DATA = [
-  { id: 1, title: 'RBI Policy Decision', date: new Date(2026, 5, 24, 14, 30), impact: 'High', type: 'RBI Meetings', description: 'The Reserve Bank of India announces its monetary policy decision.', color: '#D85A30' },
+  { id: 1, title: 'RBI Policy Decision', date: new Date(2026, 5, 24, 14, 30), impact: 'High', type: 'RBI', description: 'The Reserve Bank of India announces its monetary policy decision.', color: '#D85A30' },
   { id: 2, title: 'TCS Q1 FY27 Earnings', date: new Date(2026, 5, 25, 16, 0), impact: 'Medium', type: 'Earnings', description: 'Tata Consultancy Services reports Q1 earnings.', color: '#BA7517' },
   { id: 3, title: 'US Fed Interest Rate Decision', date: new Date(2026, 5, 26, 18, 30), impact: 'High', type: 'Global', description: 'Federal Reserve announces its latest policy decision.', color: '#00A37A' },
   { id: 4, title: 'Infosys Q1 FY27 Results', date: new Date(2026, 5, 27, 10, 0), impact: 'Medium', type: 'Earnings', description: 'Infosys reports Q1 results with FY27 guidance.', color: '#BA7517' },
   { id: 5, title: 'HDFC Bank AGM', date: new Date(2026, 5, 28, 15, 0), impact: 'Low', type: 'Corporate', description: 'Annual General Meeting of shareholders.', color: '#999' },
   { id: 6, title: 'ITC Q1 FY27 Earnings', date: new Date(2026, 5, 30, 14, 30), impact: 'Medium', type: 'Earnings', description: 'ITC reports Q1 earnings.', color: '#BA7517' },
-  { id: 7, title: 'SEBI Board Meeting', date: new Date(2026, 6, 5, 10, 0), impact: 'High', type: 'RBI Meetings', description: 'Securities and Exchange Board of India board meeting.', color: '#D85A30' },
+  { id: 7, title: 'SEBI Board Meeting', date: new Date(2026, 6, 5, 10, 0), impact: 'High', type: 'RBI', description: 'Securities and Exchange Board of India board meeting.', color: '#D85A30' },
   { id: 8, title: 'Reliance Q1 Earnings', date: new Date(2026, 6, 10, 14, 0), impact: 'High', type: 'Earnings', description: 'Reliance Industries reports Q1 earnings.', color: '#BA7517' },
 ];
 
 export default function Events() {
-  const [selectedEventType, setSelectedEventType] = useState('All Events');
+  const [selectedEventType, setSelectedEventType] = useState('All');
   const [currentDate, setCurrentDate] = useState(new Date(2026, 5));
   const [view, setView] = useState('Monthly');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,6 +27,7 @@ export default function Events() {
   const [yearlyMonth, setYearlyMonth] = useState(null);
   const [showPastDates, setShowPastDates] = useState(false);
   const [hoveredMiniMonth, setHoveredMiniMonth] = useState(null);
+  const [upcomingOpen, setUpcomingOpen] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -63,18 +63,12 @@ export default function Events() {
     });
   };
 
-  const filteredEvents = selectedEventType === 'All Events'
-    ? EVENTS_DATA
-    : EVENTS_DATA.filter((e) => e.type === selectedEventType);
-
+  const filteredEvents = selectedEventType === 'All' ? EVENTS_DATA : EVENTS_DATA.filter((e) => e.type === selectedEventType);
   const EVENTS_PER_PAGE = 6;
-  const nextEvents = filteredEvents
-    .sort((a, b) => a.date - b.date)
-    .slice(eventPage * EVENTS_PER_PAGE, (eventPage + 1) * EVENTS_PER_PAGE);
-
+  const nextEvents = filteredEvents.sort((a, b) => a.date - b.date).slice(eventPage * EVENTS_PER_PAGE, (eventPage + 1) * EVENTS_PER_PAGE);
   const totalEventPages = Math.ceil(filteredEvents.sort((a, b) => a.date - b.date).length / EVENTS_PER_PAGE);
 
-  const eventTypes = ['All Events', 'RBI Meetings', 'Earnings', 'Corporate', 'Global'];
+  const eventTypes = ['All', 'RBI', 'Earnings', 'Corporate', 'Global'];
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -118,256 +112,6 @@ export default function Events() {
 
   const monthName = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  const getWeekDays = () => {
-    const curr = new Date(currentDate);
-    const first = curr.getDate() - curr.getDay();
-    const weekDays = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(curr.setDate(first + i));
-      weekDays.push(new Date(d));
-    }
-    return weekDays;
-  };
-
-  const weekDays = getWeekDays();
-  const weekEvents = filteredEvents.filter((e) => {
-    return weekDays.some((d) => d.toDateString() === e.date.toDateString());
-  });
-
-  const dailyEvents = filteredEvents.filter((e) => {
-    return e.date.toDateString() === currentDate.toDateString();
-  });
-
-  const renderYearlyCalendar = () => {
-    if (yearlyMonth !== null) {
-      const monthDate = new Date(year, yearlyMonth);
-      const firstDayOfMonth = new Date(year, yearlyMonth, 1).getDay();
-      const daysOfMonth = new Date(year, yearlyMonth + 1, 0).getDate();
-      const monthEventsData = filteredEvents.filter((e) => e.date.getMonth() === yearlyMonth && e.date.getFullYear() === year);
-
-      return (
-        <div style={s.fullMonthView}>
-          <button onClick={() => setYearlyMonth(null)} style={s.backBtn}>← Back to yearly view</button>
-          <h2 style={s.fullMonthTitle}>{monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h2>
-
-          <div style={s.dayHeadersLarge}>
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-              <div key={d} style={s.dayHeaderLarge}>{d}</div>
-            ))}
-          </div>
-
-          <div style={s.calendarGridLarge}>
-            {Array.from({ length: firstDayOfMonth }).map((_, i) => (<div key={`empty-${i}`} />))}
-            {Array.from({ length: daysOfMonth }).map((_, i) => {
-              const day = i + 1;
-              const dayHasEvent = monthEventsData.some((e) => e.date.getDate() === day);
-              const eventColor = dayHasEvent ? monthEventsData.find((e) => e.date.getDate() === day)?.color : null;
-              const dayEvents = monthEventsData.filter((e) => e.date.getDate() === day);
-
-              return (
-                <div
-                  key={day}
-                  style={{
-                    ...s.calendarDayLarge,
-                    ...(eventColor ? { background: `${eventColor}20`, border: `1.5px solid ${eventColor}` } : {}),
-                  }}
-                  onMouseEnter={() => setHoveredDate(`${year}-${yearlyMonth}-${day}`)}
-                  onMouseLeave={() => setHoveredDate(null)}
-                >
-                  {day}
-                  {eventColor && <div style={{ ...s.eventDotLarge, background: eventColor }} />}
-                  {hoveredDate === `${year}-${yearlyMonth}-${day}` && dayEvents.length > 0 && (
-                    <div style={s.hoverPreview}>
-                      {dayEvents.map((evt) => (
-                        <div key={evt.id} style={{ fontSize: 11, fontWeight: 500, marginBottom: 4 }}>
-                          {evt.title}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      );
-    }
-
-    const months = [];
-    for (let m = 0; m < 12; m++) {
-      const monthDate = new Date(year, m);
-      const firstDayOfMonth = new Date(year, m, 1).getDay();
-      const daysOfMonth = new Date(year, m + 1, 0).getDate();
-      const monthEvents = filteredEvents.filter((e) => e.date.getMonth() === m && e.date.getFullYear() === year);
-
-      months.push({
-        month: m,
-        name: monthDate.toLocaleDateString('en-US', { month: 'short' }),
-        firstDay: firstDayOfMonth,
-        days: daysOfMonth,
-        events: monthEvents,
-      });
-    }
-
-    return (
-      <div style={s.yearlyGrid}>
-        {months.map((m) => (
-          <div
-            key={m.month}
-            style={{
-              ...s.miniCalendar,
-              ...(hoveredMiniMonth === m.month ? s.miniCalendarHover : {}),
-            }}
-            onMouseEnter={() => setHoveredMiniMonth(m.month)}
-            onMouseLeave={() => setHoveredMiniMonth(null)}
-            onClick={() => setYearlyMonth(m.month)}
-          >
-            <div style={s.miniMonthName}>{m.name} {year}</div>
-            <div style={s.miniDayHeaders}>
-              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
-                <div key={d} style={s.miniDayHeader}>{d}</div>
-              ))}
-            </div>
-            <div style={s.miniCalendarGrid}>
-              {Array.from({ length: m.firstDay }).map((_, i) => (<div key={`empty-${i}`} />))}
-              {Array.from({ length: m.days }).map((_, i) => {
-                const day = i + 1;
-                const dayHasEvent = m.events.some((e) => e.date.getDate() === day);
-                const eventColor = dayHasEvent ? m.events.find((e) => e.date.getDate() === day)?.color : null;
-
-                return (
-                  <div
-                    key={day}
-                    style={{
-                      ...s.miniDay,
-                      ...(eventColor ? { background: `${eventColor}20`, border: `0.5px solid ${eventColor}` } : {}),
-                    }}
-                  >
-                    {day}
-                    {eventColor && <div style={{ ...s.miniEventDot, background: eventColor }} />}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderWeeklyView = () => {
-    const hours = Array.from({ length: 16 }, (_, i) => i + 8);
-
-    return (
-      <div style={s.weeklyContainer}>
-        <div style={s.weeklyHeader}>
-          <button onClick={() => setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() - 7)))} style={s.weekNavBtn}>←</button>
-          <span style={s.weekDateRange}>
-            {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-          </span>
-          <button onClick={() => setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() + 7)))} style={s.weekNavBtn}>→</button>
-        </div>
-
-        <div style={s.weeklyGrid}>
-          <div style={s.timeColumn}>
-            <div style={s.timeHeader}></div>
-            {hours.map((hour) => (
-              <div key={hour} style={s.timeSlot}>
-                {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 AM`}
-              </div>
-            ))}
-          </div>
-
-          {weekDays.map((day, dayIdx) => (
-            <div key={dayIdx} style={s.dayColumn}>
-              <div style={s.dayHeader}>
-                <span style={s.dayOfWeek}>{day.toLocaleDateString('en-US', { weekday: 'short' })}</span>
-                <span style={s.dayDate}>{day.getDate()}</span>
-              </div>
-              <div style={s.hourGridContainer}>
-                {hours.map((hour) => {
-                  const dayEventInHour = weekEvents.filter((e) => {
-                    return e.date.toDateString() === day.toDateString() && e.date.getHours() === hour;
-                  });
-
-                  return (
-                    <div key={hour} style={s.hourCell}>
-                      {dayEventInHour.map((evt) => (
-                        <div
-                          key={evt.id}
-                          onClick={() => setSelectedEvent(evt)}
-                          style={{
-                            ...s.eventBlock,
-                            background: evt.color,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <p style={s.eventBlockTitle}>{evt.title}</p>
-                          <p style={s.eventBlockTime}>{evt.date.getHours()}:{String(evt.date.getMinutes()).padStart(2, '0')}</p>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderDailyView = () => {
-    const hours = Array.from({ length: 16 }, (_, i) => i + 8);
-
-    return (
-      <div style={s.dailyContainer}>
-        <div style={s.dailyHeader}>
-          <button onClick={() => setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() - 1)))} style={s.dayNavBtn}>←</button>
-          <h2 style={s.dailyDateTitle}>
-            {currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-          </h2>
-          <button onClick={() => setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() + 1)))} style={s.dayNavBtn}>→</button>
-        </div>
-
-        <div style={s.dailyGrid}>
-          <div style={s.timeColumnDaily}>
-            {hours.map((hour) => (
-              <div key={hour} style={s.timeSlotDaily}>
-                {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 AM`}
-              </div>
-            ))}
-          </div>
-
-          <div style={s.dayEventsContainer}>
-            {hours.map((hour) => {
-              const eventInHour = dailyEvents.filter((e) => e.date.getHours() === hour);
-
-              return (
-                <div key={hour} style={s.hourCellDaily}>
-                  {eventInHour.map((evt) => (
-                    <div
-                      key={evt.id}
-                      onClick={() => setSelectedEvent(evt)}
-                      style={{
-                        ...s.eventBlockDaily,
-                        background: evt.color,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <p style={s.eventBlockTitleDaily}>{evt.title}</p>
-                      <p style={s.eventBlockTimeDaily}>{evt.date.getHours()}:{String(evt.date.getMinutes()).padStart(2, '0')}</p>
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div style={s.page}>
       <Head>
@@ -384,94 +128,74 @@ export default function Events() {
           <Link href="/tools" style={s.navLink}>Tools</Link>
           <Link href="/events" style={{ ...s.navLink, color: '#fff', fontWeight: 700 }}>Events</Link>
         </div>
-        <button className="burger-menu" onClick={() => setMenuOpen(!menuOpen)} style={s.burger} aria-label="Menu">☰</button>
+        <button className="burger-menu" onClick={() => setMenuOpen(true)} style={s.burger} aria-label="Menu">☰</button>
       </nav>
 
       {menuOpen && (
-        <div style={s.mobileMenu}>
-          <Link href="/" style={s.mobileLink}>Home</Link>
-          <Link href="/about" style={s.mobileLink}>About</Link>
-          <Link href="/tools" style={s.mobileLink}>Tools</Link>
-          <Link href="/events" style={{ ...s.mobileLink, background: '#00A37A', color: '#fff' }}>Events Calendar</Link>
+        <div className="sai-menu-overlay" style={s.menuOverlay} onClick={() => setMenuOpen(false)}>
+          <div style={s.menuPanel} onClick={(e) => e.stopPropagation()}>
+            <div style={s.menuHeader}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>setup<span style={{ color: '#00C896' }}>ai</span></span>
+              <button onClick={() => setMenuOpen(false)} style={s.menuClose} aria-label="Close">✕</button>
+            </div>
+            <p style={s.menuTagline}>Your edge in the market</p>
+
+            <div style={s.menuLinks}>
+              <Link href="/" style={s.menuLink}>🏠 Home</Link>
+              <Link href="/about" style={s.menuLink}>ℹ️ About</Link>
+              <Link href="/tools" style={s.menuLink}>🧰 Tools</Link>
+              <Link href="/events" style={{ ...s.menuLink, background: '#00A37A', color: '#fff' }}>📅 Events Calendar</Link>
+            </div>
+          </div>
         </div>
       )}
 
       <div style={s.container}>
-        <aside style={s.sidebar}>
-          <h3 style={s.sidebarTitle}>Events</h3>
-          <div style={s.timeline}>
-            {nextEvents.length === 0 ? (
-              <p style={s.emptyText}>No events in this filter.</p>
-            ) : (
-              <div style={{ position: 'relative' }}>
-                <div style={s.timelineVerticalLine} />
-                {nextEvents.map((event) => (
-                  <div key={event.id} style={s.timelineEvent}>
-                    <div style={{ ...s.timelineDot, background: event.color }} />
-                    <div>
-                      <p style={s.eventName}>{event.title}</p>
-                      <p style={s.eventDate}>
-                        {event.date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                      <p style={{ ...s.eventImpact, color: event.color }}>{event.impact} Impact</p>
-                    </div>
+        <main style={s.main}>
+          <h1 style={s.pageTitle}>Market Events Calendar</h1>
+
+          {/* MOBILE: Upcoming events at TOP (Collapsible) */}
+          <div className="sai-upcoming-mobile" style={s.upcomingMobileSection}>
+            <button onClick={() => setUpcomingOpen(!upcomingOpen)} style={s.upcomingBtn}>
+              <span>📌 This Week's Events ({filteredEvents.filter(e => e.date.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000).length})</span>
+              <span style={{ color: '#0D5C6E', fontSize: 12 }}>{upcomingOpen ? '▴' : '▾'}</span>
+            </button>
+            
+            {upcomingOpen && (
+              <div style={s.upcomingList}>
+                {filteredEvents.filter(e => e.date.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000).slice(0, 3).map((event) => (
+                  <div key={event.id} style={{ ...s.upcomingEvent, borderLeft: `3px solid ${event.color}` }}>
+                    <p style={s.upcomingTitle}>{event.title}</p>
+                    <p style={s.upcomingTime}>{event.date.toLocaleDateString('en-IN')} • {event.impact} Impact</p>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {totalEventPages > 1 && (
-            <div style={s.eventPaginationCard}>
-              <button
-                onClick={() => setEventPage(Math.max(0, eventPage - 1))}
-                disabled={eventPage === 0}
-                style={{ 
-                  ...s.paginationCardBtn, 
-                  ...(eventPage === 0 ? s.paginationCardBtnDisabled : s.paginationCardBtnPrev)
-                }}
-              >
-                ← Previous
-              </button>
-              <button
-                onClick={() => setEventPage(Math.min(totalEventPages - 1, eventPage + 1))}
-                disabled={eventPage >= totalEventPages - 1}
-                style={{ 
-                  ...s.paginationCardBtn, 
-                  ...(eventPage >= totalEventPages - 1 ? s.paginationCardBtnDisabled : s.paginationCardBtnNext)
-                }}
-              >
-                Next →
-              </button>
-            </div>
-          )}
+          {/* Mobile: Filters in ONE LINE */}
+          <div className="sai-filters-mobile" style={s.filterRowMobile}>
+            <select value={view} onChange={(e) => setView(e.target.value)} style={s.filterSelectMobile}>
+              <option value="Monthly">📅 Monthly</option>
+              <option value="Yearly">📆 Yearly</option>
+              <option value="List">📋 List</option>
+            </select>
+            
+            <select value={selectedEventType} onChange={(e) => setSelectedEventType(e.target.value)} style={s.filterSelectMobile}>
+              <option value="All">🔽 All Types</option>
+              <option value="RBI">🏦 RBI</option>
+              <option value="Earnings">💼 Earnings</option>
+              <option value="Corporate">🏢 Corporate</option>
+              <option value="Global">🌍 Global</option>
+            </select>
+          </div>
 
-          <div style={s.pageInfo}>{eventPage + 1} of {totalEventPages}</div>
-
-          <label style={s.notificationToggle}>
-            <input
-              type="checkbox"
-              checked={notificationEnabled}
-              onChange={(e) => {
-                setNotificationEnabled(e.target.checked);
-                if (e.target.checked) scheduleNotifications();
-              }}
-            />
-            <span>🔔 Get 15-min alerts</span>
-          </label>
-        </aside>
-
-        <main style={s.main}>
-          <h1 style={s.pageTitle}>Market Events Calendar</h1>
-
-          <div style={s.filterRow}>
+          {/* Desktop: Filter row */}
+          <div className="sai-filters-desktop" style={s.filterRow}>
             {eventTypes.map((type) => (
               <button
                 key={type}
-                onClick={() => {
-                  setSelectedEventType(type);
-                  setEventPage(0);
-                }}
+                onClick={() => setSelectedEventType(type)}
                 style={{
                   ...s.filterBtn,
                   background: selectedEventType === type ? '#0D5C6E' : '#fff',
@@ -503,24 +227,6 @@ export default function Events() {
             <span style={s.untilText}>Until 31 Mar 2027</span>
           </div>
 
-          {view === 'Daily' && (
-            <div style={s.calendarBox}>
-              {renderDailyView()}
-            </div>
-          )}
-
-          {view === 'Weekly' && (
-            <div style={s.calendarBox}>
-              {renderWeeklyView()}
-            </div>
-          )}
-
-          {view === 'Yearly' && (
-            <div style={s.calendarBox}>
-              {renderYearlyCalendar()}
-            </div>
-          )}
-
           {view === 'Monthly' && (
             <div style={s.calendarBox}>
               <div style={s.monthNav}>
@@ -529,35 +235,19 @@ export default function Events() {
                 <button onClick={nextMonth} style={s.navBtn}>→</button>
               </div>
 
-              {/* Calendar navigation buttons - card style horizontal row */}
               <div style={s.calendarNavRow}>
-                <button
-                  onClick={() => setShowPastDates(false)}
-                  style={{
-                    ...s.calendarNavBtn,
-                    ...(showPastDates ? s.calendarNavBtnInactive : s.calendarNavBtnActive)
-                  }}
-                >
+                <button onClick={() => setShowPastDates(false)} style={{ ...s.calendarNavBtn, ...(showPastDates ? s.calendarNavBtnInactive : s.calendarNavBtnActive) }}>
                   ← Hide Past
                 </button>
-                <button
-                  onClick={() => setShowPastDates(true)}
-                  style={{
-                    ...s.calendarNavBtn,
-                    ...(showPastDates ? s.calendarNavBtnActive : s.calendarNavBtnInactive)
-                  }}
-                >
+                <button onClick={() => setShowPastDates(true)} style={{ ...s.calendarNavBtn, ...(showPastDates ? s.calendarNavBtnActive : s.calendarNavBtnInactive) }}>
                   Show Full ⊕
                 </button>
               </div>
 
               <div style={s.dayHeaders}>
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((d) => (
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
                   <div key={d} style={s.dayHeader}>{d}</div>
                 ))}
-                <div style={s.satHeaderWithIcon}>
-                  <span style={s.satText}>Sat</span>
-                </div>
               </div>
 
               <div style={s.calendarGrid}>
@@ -591,6 +281,58 @@ export default function Events() {
               </div>
             </div>
           )}
+
+          {view === 'Yearly' && (
+            <div style={s.calendarBox}>
+              {yearlyMonth !== null ? (
+                <div>
+                  <button onClick={() => setYearlyMonth(null)} style={s.backBtn}>← Back to yearly</button>
+                  <h2 style={s.fullMonthTitle}>{new Date(year, yearlyMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h2>
+                </div>
+              ) : (
+                <div style={s.yearlyGrid}>
+                  {Array.from({ length: 12 }).map((_, m) => {
+                    const monthDate = new Date(year, m);
+                    const firstDayOfMonth = new Date(year, m, 1).getDay();
+                    const daysOfMonth = new Date(year, m + 1, 0).getDate();
+                    const monthEventsData = filteredEvents.filter((e) => e.date.getMonth() === m && e.date.getFullYear() === year);
+
+                    return (
+                      <div
+                        key={m}
+                        style={{ ...s.miniCalendar, ...(hoveredMiniMonth === m ? s.miniCalendarHover : {}) }}
+                        onMouseEnter={() => setHoveredMiniMonth(m)}
+                        onMouseLeave={() => setHoveredMiniMonth(null)}
+                        onClick={() => setYearlyMonth(m)}
+                      >
+                        <div style={s.miniMonthName}>{monthDate.toLocaleDateString('en-US', { month: 'short' })} {year}</div>
+                        <div style={s.miniDayHeaders}>
+                          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
+                            <div key={d} style={s.miniDayHeader}>{d}</div>
+                          ))}
+                        </div>
+                        <div style={s.miniCalendarGrid}>
+                          {Array.from({ length: firstDayOfMonth }).map((_, i) => (<div key={`empty-${i}`} />))}
+                          {Array.from({ length: daysOfMonth }).map((_, i) => {
+                            const day = i + 1;
+                            const dayHasEvent = monthEventsData.some((e) => e.date.getDate() === day);
+                            const eventColor = dayHasEvent ? monthEventsData.find((e) => e.date.getDate() === day)?.color : null;
+
+                            return (
+                              <div key={day} style={{ ...s.miniDay, ...(eventColor ? { background: `${eventColor}20`, border: `0.5px solid ${eventColor}` } : {}) }}>
+                                {day}
+                                {eventColor && <div style={{ ...s.miniEventDot, background: eventColor }} />}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </main>
       </div>
 
@@ -599,9 +341,7 @@ export default function Events() {
           <div style={s.eventPopupContent}>
             <button onClick={() => setSelectedEvent(null)} style={s.closeBtn}>✕</button>
             <h3 style={s.eventPopupTitle}>{selectedEvent.title}</h3>
-            <p style={s.eventPopupMeta}>
-              {selectedEvent.date.toLocaleDateString('en-IN', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-            </p>
+            <p style={s.eventPopupMeta}>{selectedEvent.date.toLocaleDateString('en-IN', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
             <p style={{ ...s.eventPopupImpact, color: selectedEvent.color }}>{selectedEvent.impact} Impact</p>
             <p style={s.eventPopupDesc}>{selectedEvent.description}</p>
           </div>
@@ -616,15 +356,20 @@ export default function Events() {
           <Link href="/tools" style={s.footerLink}>Tools</Link>
           <Link href="/events" style={s.footerLink}>Events</Link>
         </div>
-        <p style={s.disclaimer}>
-          Financial news and information for educational purposes only. Nothing here is investment advice.
-        </p>
+        <p style={s.disclaimer}>Financial news and information for educational purposes only. Nothing here is investment advice.</p>
       </footer>
 
       <style>{`
         @media (max-width: 860px) {
           .desktop-nav { display: none !important; }
           .burger-menu { display: block !important; }
+          .sai-upcoming-mobile { display: block !important; }
+          .sai-filters-mobile { display: flex !important; }
+          .sai-filters-desktop { display: none !important; }
+        }
+        @media (min-width: 861px) {
+          .sai-upcoming-mobile { display: none !important; }
+          .sai-filters-mobile { display: none !important; }
         }
       `}</style>
     </div>
@@ -633,103 +378,51 @@ export default function Events() {
 
 const s = {
   page: { fontFamily: FONT, background: '#FAF6EF', minHeight: '100vh' },
-
   nav: { background: 'linear-gradient(135deg, #0D5C6E 0%, #0B3038 100%)', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
   logo: { fontSize: 18, fontWeight: 700, color: '#fff', textDecoration: 'none' },
   navLinks: { display: 'flex', gap: 24 },
   navLink: { fontSize: 13, color: '#9FE1CB', textDecoration: 'none', fontWeight: 500 },
   burger: { display: 'none', background: 'transparent', border: 'none', color: '#fff', fontSize: 20, cursor: 'pointer' },
-
-  mobileMenu: { background: '#fff', border: '1px solid #e0e0e0', padding: '12px', display: 'flex', flexDirection: 'column', gap: 8, position: 'absolute', top: 60, right: 0, zIndex: 100, minWidth: 180 },
-  mobileLink: { padding: '10px', fontSize: 13, textDecoration: 'none', color: '#333', borderRadius: 6, display: 'block', textAlign: 'center' },
-
+  menuOverlay: { position: 'fixed', inset: 0, background: 'rgba(20,15,10,0.45)', zIndex: 2000, display: 'flex', justifyContent: 'flex-end' },
+  menuPanel: { width: '78%', maxWidth: 320, height: '100%', background: 'linear-gradient(180deg, #FFFDF9 0%, #FAF6EF 100%)', boxShadow: '-10px 0 30px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', overflowY: 'auto' },
+  menuHeader: { background: 'linear-gradient(135deg, #0D5C6E 0%, #0B3038 100%)', padding: '18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  menuClose: { background: 'transparent', border: 'none', color: '#9FE1CB', fontSize: 18, cursor: 'pointer' },
+  menuTagline: { fontSize: 11, color: '#0D5C6E', margin: '14px 18px 4px', fontWeight: 500 },
+  menuLinks: { padding: '8px 12px 20px', display: 'flex', flexDirection: 'column', gap: 7 },
+  menuLink: { display: 'flex', alignItems: 'center', gap: 11, padding: '12px 13px', borderRadius: 11, background: '#fff', border: '1px solid #ECE4D6', fontSize: 14, color: '#1A2B2E', fontWeight: 600, textDecoration: 'none', fontFamily: FONT, cursor: 'pointer' },
   container: { display: 'flex', gap: 20, margin: '20px', maxWidth: 1400 },
-
-  sidebar: { width: 260, background: '#fff', border: '0.5px solid #e0e0e0', borderRadius: 12, padding: 20, height: 'fit-content' },
-  sidebarTitle: { margin: '0 0 16px', fontSize: 13, fontWeight: 700, color: '#333', textTransform: 'uppercase', letterSpacing: 1 },
-
-  timeline: { display: 'flex', flexDirection: 'column', gap: 0, position: 'relative', marginBottom: 16 },
-  timelineVerticalLine: { position: 'absolute', left: '8px', top: '18px', bottom: '0', width: '2px', background: '#BFD9D3' },
-  timelineEvent: { display: 'flex', gap: 12, paddingLeft: 12, position: 'relative', marginBottom: 16 },
-  timelineDot: { width: 18, height: 18, borderRadius: '50%', border: '3px solid #fff', position: 'absolute', left: -8, top: 2, zIndex: 1 },
-  eventName: { margin: 0, fontSize: 12, fontWeight: 600, color: '#333' },
-  eventDate: { margin: '2px 0', fontSize: 11, color: '#666' },
-  eventImpact: { margin: 0, fontSize: 10, fontWeight: 500 },
-  emptyText: { fontSize: 12, color: '#999' },
-
-  eventPaginationCard: { display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 12, borderTop: '1px solid #e0e0e0' },
-  paginationCardBtn: { padding: '12px 16px', fontSize: 13, border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: FONT, fontWeight: 700, transition: 'all 0.2s ease' },
-  paginationCardBtnNext: { background: '#0D5C6E', color: '#fff' },
-  paginationCardBtnPrev: { background: '#E0E0E0', color: '#666' },
-  paginationCardBtnDisabled: { background: '#E0E0E0', color: '#999', cursor: 'default', opacity: 0.6 },
-  pageInfo: { fontSize: 11, textAlign: 'center', color: '#666', marginTop: 8, fontWeight: 500 },
-
-  notificationToggle: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, padding: '10px', background: '#f5f5f5', borderRadius: 6, cursor: 'pointer', fontSize: 12 },
-
   main: { flex: 1 },
   pageTitle: { margin: '0 0 20px', fontSize: 28, fontWeight: 700, color: '#333' },
-
+  upcomingMobileSection: { display: 'none', marginBottom: 16 },
+  upcomingBtn: { width: '100%', background: '#fff', border: '1px solid #E4DCCE', padding: '11px 12px', borderRadius: 8, textAlign: 'left', fontFamily: FONT, fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  upcomingList: { background: '#fff', border: '1px solid #E4DCCE', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: 8, display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 },
+  upcomingEvent: { padding: 8, background: '#FAECE7', borderRadius: 6, borderLeft: '3px solid #D85A30' },
+  upcomingTitle: { margin: 0, fontSize: 12, fontWeight: 600, color: '#333' },
+  upcomingTime: { margin: '4px 0 0', fontSize: 10, color: '#666' },
+  filterRowMobile: { display: 'none', gap: 8, marginBottom: 16 },
+  filterSelectMobile: { flex: 1, padding: '8px 10px', fontSize: 12, border: '1px solid #E4DCCE', borderRadius: 6, background: '#fff', fontFamily: FONT, cursor: 'pointer', fontWeight: 500 },
   filterRow: { display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' },
   filterBtn: { padding: '8px 14px', fontSize: 12, border: '0.5px solid #ccc', borderRadius: 8, cursor: 'pointer', fontFamily: FONT, fontWeight: 500 },
-
   viewControls: { display: 'flex', gap: 8, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' },
   viewLabel: { fontSize: 12, color: '#666', fontWeight: 600 },
   viewBtn: { padding: '6px 12px', fontSize: 12, border: '0.5px solid #ccc', borderRadius: 6, cursor: 'pointer', fontFamily: FONT },
   untilText: { fontSize: 11, color: '#999', marginLeft: 'auto' },
-
   calendarBox: { background: '#fff', border: '0.5px solid #e0e0e0', borderRadius: 12, padding: 16 },
   monthNav: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 12 },
   navBtn: { background: 'transparent', border: 'none', fontSize: 18, cursor: 'pointer', color: '#0D5C6E', fontWeight: 700 },
   monthName: { margin: 0, fontSize: 18, fontWeight: 700, color: '#333', flex: 1, textAlign: 'center' },
-
   calendarNavRow: { display: 'flex', gap: 8, marginBottom: 14 },
   calendarNavBtn: { flex: 1, padding: '10px 14px', fontSize: 12, border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: FONT, fontWeight: 700, transition: 'all 0.2s ease' },
   calendarNavBtnActive: { background: '#0D5C6E', color: '#fff' },
   calendarNavBtnInactive: { background: '#E0E0E0', color: '#999' },
-
   dayHeaders: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginBottom: 10, textAlign: 'center' },
   dayHeader: { fontSize: 11, fontWeight: 700, color: '#666' },
-  satHeaderWithIcon: { fontSize: 11, fontWeight: 700, color: '#666' },
-  satText: { flex: 1 },
-
   calendarGrid: { display: 'flex', flexDirection: 'column', gap: 6 },
   weekRow: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 },
   calendarDay: { aspectRatio: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 6, position: 'relative', minHeight: 50, fontSize: 13, fontWeight: 600 },
   dayNumber: { fontSize: 12, fontWeight: 600, color: '#333' },
   eventDot: { width: 6, height: 6, borderRadius: '50%', marginTop: 3 },
-
-  weeklyContainer: { padding: '16px' },
-  weeklyHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
-  weekDateRange: { fontSize: 16, fontWeight: 700, color: '#333' },
-  weekNavBtn: { background: '#0D5C6E', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: 6, cursor: 'pointer', fontFamily: FONT },
-  weeklyGrid: { display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr 1fr 1fr 1fr 1fr', gap: 8, background: '#fff' },
-  timeColumn: { paddingTop: '40px' },
-  timeSlot: { height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8, fontSize: 11, color: '#666', fontWeight: 500, borderRight: '1px solid #e0e0e0' },
-  timeHeader: { height: '40px', paddingRight: 8 },
-  dayColumn: { borderLeft: '1px solid #e0e0e0' },
-  dayHeader: { height: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #e0e0e0', background: '#f9f9f9' },
-  dayOfWeek: { fontSize: 11, fontWeight: 600, color: '#666' },
-  dayDate: { fontSize: 16, fontWeight: 700, color: '#333' },
-  hourGridContainer: { position: 'relative' },
-  hourCell: { height: '60px', borderBottom: '1px solid #e0e0e0', position: 'relative', padding: 4 },
-  eventBlock: { padding: '4px 6px', borderRadius: 4, color: '#fff', fontSize: 10, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' },
-  eventBlockTitle: { margin: '0 0 2px', fontSize: 10, fontWeight: 600 },
-  eventBlockTime: { margin: 0, fontSize: 9 },
-
-  dailyContainer: { padding: '16px' },
-  dailyHeader: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 20 },
-  dailyDateTitle: { margin: 0, fontSize: 20, fontWeight: 700, color: '#333', flex: 1, textAlign: 'center' },
-  dayNavBtn: { background: '#0D5C6E', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: 6, cursor: 'pointer', fontFamily: FONT },
-  dailyGrid: { display: 'grid', gridTemplateColumns: '80px 1fr', gap: 8 },
-  timeColumnDaily: { paddingTop: '0', paddingRight: 8 },
-  timeSlotDaily: { height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', fontSize: 11, color: '#666', fontWeight: 500, borderRight: '1px solid #e0e0e0' },
-  dayEventsContainer: { position: 'relative' },
-  hourCellDaily: { height: '60px', borderBottom: '1px solid #e0e0e0', position: 'relative', padding: 4 },
-  eventBlockDaily: { padding: '4px 8px', borderRadius: 4, color: '#fff', fontSize: 10, fontWeight: 600, overflow: 'hidden' },
-  eventBlockTitleDaily: { margin: '0 0 2px', fontSize: 10, fontWeight: 600 },
-  eventBlockTimeDaily: { margin: 0, fontSize: 9 },
-
-  yearlyGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 },
+  yearlyGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 },
   miniCalendar: { background: '#f9f9f9', border: '1px solid #e0e0e0', borderRadius: 8, padding: 10, cursor: 'pointer', transition: 'all 0.2s ease' },
   miniCalendarHover: { transform: 'scale(1.05)', boxShadow: '0 8px 20px rgba(0,0,0,0.12)', borderColor: '#0D5C6E' },
   miniMonthName: { width: '100%', margin: 0, padding: '6px', fontSize: 12, fontWeight: 700, color: '#0D5C6E', textAlign: 'center', marginBottom: 6 },
@@ -738,18 +431,8 @@ const s = {
   miniCalendarGrid: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 },
   miniDay: { aspectRatio: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 500, color: '#333', background: '#fff', border: '0.5px solid #e0e0e0', borderRadius: 3, position: 'relative' },
   miniEventDot: { width: 3, height: 3, borderRadius: '50%', marginTop: 1 },
-
-  hoverPreview: { position: 'absolute', top: '-60px', left: '50%', transform: 'translateX(-50%)', background: '#333', color: '#fff', padding: '8px 12px', borderRadius: 6, fontSize: 11, zIndex: 10, minWidth: '150px' },
-
-  fullMonthView: { background: '#f9f9f9', padding: 20, borderRadius: 12 },
   backBtn: { padding: '8px 12px', fontSize: 12, background: '#0D5C6E', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontFamily: FONT, marginBottom: 16 },
   fullMonthTitle: { margin: '0 0 16px', fontSize: 22, fontWeight: 700, color: '#333', textAlign: 'center' },
-  dayHeadersLarge: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, marginBottom: 12, textAlign: 'center' },
-  dayHeaderLarge: { fontSize: 13, fontWeight: 700, color: '#666' },
-  calendarGridLarge: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 },
-  calendarDayLarge: { aspectRatio: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 8, position: 'relative', minHeight: 80, fontSize: 15, fontWeight: 600, background: '#fff', border: '0.5px solid #e0e0e0' },
-  eventDotLarge: { width: 8, height: 8, borderRadius: '50%', marginTop: 4 },
-
   eventPopup: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
   eventPopupContent: { background: '#fff', borderRadius: 12, padding: 24, maxWidth: 400, position: 'relative' },
   closeBtn: { position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', fontSize: 16, cursor: 'pointer', color: '#666' },
@@ -757,7 +440,6 @@ const s = {
   eventPopupMeta: { margin: '0 0 8px', fontSize: 13, color: '#666' },
   eventPopupImpact: { margin: '0 0 12px', fontSize: 12, fontWeight: 600 },
   eventPopupDesc: { margin: 0, fontSize: 13, color: '#666', lineHeight: 1.5 },
-
   footer: { background: '#0D5C6E', color: '#C8E9DF', padding: 24, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, fontSize: 12, marginTop: 40 },
   footerLinks: { display: 'flex', gap: 16 },
   footerLink: { color: '#9FE1CB', textDecoration: 'none', fontWeight: 500 },
