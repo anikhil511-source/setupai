@@ -47,22 +47,27 @@ export default function Home() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeIndex, setActiveIndex] = useState(null);  // index of opened card in the visible list
-  const [readIds, setReadIds] = useState(() => new Set());  // session-only "read" tracking
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [readIds, setReadIds] = useState(() => new Set());
   const [tagIndex, setTagIndex] = useState(0);
   const [tagVisible, setTagVisible] = useState(true);
   const [moodOpen, setMoodOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);       // mobile hamburger menu
-  const [mobileMoodOpen, setMobileMoodOpen] = useState(false);  // mood dropdown inside menu
-  const [hotOpen, setHotOpen] = useState(false);         // mobile hot-topics bar
-  const [pendingCards, setPendingCards] = useState(null);  // freshly fetched cards waiting to be shown
-  const [newCount, setNewCount] = useState(0);             // how many are new
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileMoodOpen, setMobileMoodOpen] = useState(false);
+  const [hotOpen, setHotOpen] = useState(false);
+  const [pendingCards, setPendingCards] = useState(null);
+  const [newCount, setNewCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');  // NEW: search by ticker/company
 
-  // Apply sector + analyst filters (sentiment is already applied via the API fetch)
+  // Apply search + sector + analyst filters
   const filtered = cards.filter((c) => {
+    const searchOk = !searchQuery || 
+                     (c.ticker || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                     (c.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                     (c.sector || '').toLowerCase().includes(searchQuery.toLowerCase());
     const sectorOk = sectorFilter === 'All' || (c.sector || '') === sectorFilter;
     const analystOk = !analystOnly || c.type === 'Analyst Pick';
-    return sectorOk && analystOk;
+    return searchOk && sectorOk && analystOk;
   });
 
   // Paginate into pages of 8
@@ -101,16 +106,15 @@ export default function Home() {
         const res = await fetch(url);
         const data = await res.json();
         if (!Array.isArray(data)) return;
-        // Count cards whose id isn't in the currently displayed set
         const shownIds = new Set(cards.map((c) => c.id));
         const fresh = data.filter((c) => !shownIds.has(c.id));
         if (fresh.length > 0) {
           setPendingCards(data);
           setNewCount(fresh.length);
         }
-      } catch (e) { /* silent — background check */ }
+      } catch (e) { /* silent */ }
     };
-    const id = setInterval(check, 60000);  // every 1 minute
+    const id = setInterval(check, 60000);
     return () => clearInterval(id);
   }, [sentiment, cards]);
 
@@ -136,7 +140,7 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
 
-  // Mark the currently-viewed card as read — covers clicks AND arrow navigation
+  // Mark the currently-viewed card as read
   useEffect(() => {
     if (activeIndex === null) return;
     const c = visibleCards[activeIndex];
@@ -144,14 +148,14 @@ export default function Home() {
   }, [activeIndex]);
 
   // Reset to first page whenever any filter changes
-  useEffect(() => { setPage(0); }, [sentiment, sectorFilter, analystOnly]);
+  useEffect(() => { setPage(0); }, [sentiment, sectorFilter, analystOnly, searchQuery]);
 
   // Hot Topics = highest-confidence recent cards
   const hotTopics = [...cards]
     .sort((a, b) => (b.confidence || 0) - (a.confidence || 0))
     .slice(0, 4);
 
-  // Market Mood — % bullish/bearish/neutral over each timeframe, from card dates
+  // Market Mood — % bullish/bearish/neutral over each timeframe
   const moodFor = (days) => {
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
     const inRange = cards.filter((c) => {
@@ -179,14 +183,14 @@ export default function Home() {
     { label: 'Weekly', m: moodFor(7) },
   ];
 
-  // Open a card by index, and mark it read (session-only)
+  // Open a card by index
   const openCard = (idx) => {
     setActiveIndex(idx);
     const c = visibleCards[idx];
     if (c) setReadIds((prev) => new Set(prev).add(c.id));
   };
 
-  // Open a card by its id within the visible list (so next/prev follows the grid)
+  // Open a card by its id within the visible list
   const openById = (id) => {
     const idx = visibleCards.findIndex((c) => c.id === id);
     if (idx !== -1) openCard(idx);
@@ -208,10 +212,8 @@ export default function Home() {
       </Head>
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
 
-      {/* ---------------- HERO (with nav inside) ---------------- */}
+      {/* HERO (cleaned up - no extra background blob) */}
       <section style={s.hero}>
-        <div style={s.heroBlob} />
-
         {/* Nav row inside the teal panel */}
         <div style={s.heroNav}>
           <Link href="/" style={s.logo}>setup<span style={{ color: '#00C896' }}>ai</span></Link>
@@ -239,7 +241,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ---------------- MOBILE SLIDE-IN MENU ---------------- */}
+      {/* MOBILE SLIDE-IN MENU */}
       {menuOpen && (
         <div className="sai-menu-overlay" style={s.menuOverlay} onClick={() => setMenuOpen(false)}>
           <div style={s.menuPanel} onClick={(e) => e.stopPropagation()}>
@@ -285,12 +287,13 @@ export default function Home() {
 
               <Link href="/tools" style={s.menuLink}>🧰 Tools</Link>
               <Link href="/about" style={s.menuLink}>ℹ️ About</Link>
+              <Link href="/events" style={s.menuLink}>📅 Events Calendar</Link>
             </div>
           </div>
         </div>
       )}
 
-      {/* ---------------- MOBILE HOT TOPICS BAR ---------------- */}
+      {/* MOBILE HOT TOPICS BAR */}
       <div className="sai-mobile-hotbar" style={s.hotBar}>
         <button onClick={() => setHotOpen((v) => !v)} style={s.hotBarHead}>
           <span style={{ fontSize: 12, color: '#D85A30', fontWeight: 700 }}>🔥 Hot Topics <span style={{ color: '#A89A82', fontWeight: 500 }}>({hotTopics.length})</span></span>
@@ -308,7 +311,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* ---------------- MAIN LAYOUT ---------------- */}
+      {/* MAIN LAYOUT */}
       <div className="sai-layout" style={s.layout}>
 
         {/* LEFT — Filters */}
@@ -356,6 +359,26 @@ export default function Home() {
         <main style={s.center}>
           <div style={s.gridHeader}>
             <p style={{ ...s.colLabel, margin: 0 }}>Latest · tap to open</p>
+            
+            {/* SEARCH BAR (replaces red line) */}
+            <input
+              type="text"
+              placeholder="Search ticker, company, keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                fontSize: 12,
+                border: '1px solid #E4DCCE',
+                borderRadius: 8,
+                background: '#fff',
+                fontFamily: "'Space Grotesk', sans-serif",
+                boxSizing: 'border-box',
+                maxWidth: 300,
+              }}
+            />
+            
             <div style={s.sectorWrap}>
               <span style={s.sectorLabel}>Sector:</span>
               <select
@@ -435,7 +458,6 @@ export default function Home() {
             </div>
 
             {moodTimeframes.map((tf, i) => {
-              // Collapsed = only Daily + Weekly (first 2); expanded = all
               if (!moodOpen && i > 1) return null;
               return (
                 <div key={tf.label} style={{ marginBottom: i === moodTimeframes.length - 1 ? 0 : 11 }}>
@@ -478,7 +500,7 @@ export default function Home() {
         </aside>
       </div>
 
-      {/* ---------------- FULL CARD MODAL ---------------- */}
+      {/* FULL CARD MODAL */}
       {activeIndex !== null && visibleCards[activeIndex] && (
         <FullCard
           card={visibleCards[activeIndex]}
@@ -490,13 +512,14 @@ export default function Home() {
         />
       )}
 
-      {/* ---------------- FOOTER ---------------- */}
+      {/* FOOTER */}
       <footer style={s.footer}>
         <span>© {new Date().getFullYear()} <span style={{ fontWeight: 700 }}>setup<span style={{ color: '#00C896' }}>ai</span></span> · setupai.in</span>
         <div style={s.footerLinks}>
           <Link href="/" style={s.footerLink}>Home</Link>
           <Link href="/about" style={s.footerLink}>About</Link>
           <Link href="/tools" style={s.footerLink}>Tools</Link>
+          <Link href="/events" style={s.footerLink}>Events</Link>
         </div>
         <p style={s.disclaimer}>
           Financial news and information for educational purposes only.
@@ -511,10 +534,9 @@ export default function Home() {
           .sai-grid { grid-template-columns: 1fr 1fr !important; }
           .sai-desktop-nav { display: none !important; }
           .sai-burger { display: block !important; }
-          .sai-right { display: none !important; }   /* mood+hot now live in menu + top bar */
+          .sai-right { display: none !important; }
           .sai-mobile-hotbar { display: block !important; }
           .sai-left { order: 0; }
-          /* compact filters: horizontal scrolling row of pills */
           .sai-filter-list { flex-direction: row !important; flex-wrap: wrap !important; gap: 6px !important; }
           .sai-filter-list button { flex: none !important; }
           .sai-type-divider { display: none !important; }
@@ -612,9 +634,9 @@ const FONT = "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif";
 const s = {
   page: { fontFamily: FONT, background: '#FAF6EF', minHeight: '100vh', boxSizing: 'border-box' },
 
+  // CLEANED HERO - no extra blob background
   hero: { background: 'linear-gradient(135deg, #0D5C6E 0%, #0B3038 100%)', padding: '18px 28px 32px',
           position: 'relative', overflow: 'hidden', margin: 16, borderRadius: 16 },
-  heroBlob: { position: 'absolute', top: -40, right: -30, width: 200, height: 200, background: 'rgba(0,200,150,0.13)', borderRadius: '50%' },
   heroNav: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', marginBottom: 22 },
   logo: { fontSize: 19, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: -0.5 },
   navLinks: { display: 'flex', gap: 22 },
