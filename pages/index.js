@@ -361,29 +361,27 @@ export default function Home() {
           <div style={s.gridHeader}>
             <p style={{ ...s.colLabel, margin: 0 }}>Latest · tap to open</p>
             
-            {/* SEARCH + SECTOR in one row */}
-            <div style={s.searchSectorRow}>
-              <input
-                type="text"
-                placeholder="Search ticker, company, keyword..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={s.searchInput}
-              />
-              
-              <div style={s.sectorWrap}>
-                <span style={s.sectorLabel}>Sector:</span>
-                <select
-                  value={sectorFilter}
-                  onChange={(e) => setSectorFilter(e.target.value)}
-                  style={s.sectorSelect}
-                >
-                  {sectorOptions.map((sec) => (
-                    <option key={sec} value={sec}>{sec === 'All' ? 'All sectors' : sec}</option>
-                  ))}
-                </select>
-              </div>
+            <div style={s.sectorWrap}>
+              <span style={s.sectorLabel}>Sector:</span>
+              <select
+                value={sectorFilter}
+                onChange={(e) => setSectorFilter(e.target.value)}
+                style={s.sectorSelect}
+              >
+                {sectorOptions.map((sec) => (
+                  <option key={sec} value={sec}>{sec === 'All' ? 'All sectors' : sec}</option>
+                ))}
+              </select>
             </div>
+
+            {/* SEARCH BOX - positioned to the right */}
+            <input
+              type="text"
+              placeholder="Search ticker, company, keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={s.searchInput}
+            />
           </div>
 
           {loading && <div style={s.muted}>Loading market intelligence…</div>}
@@ -627,9 +625,9 @@ const FONT = "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif";
 const s = {
   page: { fontFamily: FONT, background: '#FAF6EF', minHeight: '100vh', boxSizing: 'border-box', margin: 0, padding: 0 },
 
-  // CLEANED HERO - no extra blue, single rectangular area
+  // HERO - rounded rectangular
   hero: { background: 'linear-gradient(135deg, #0D5C6E 0%, #0B3038 100%)', padding: '18px 28px 32px',
-          position: 'relative', overflow: 'hidden', margin: 0, borderRadius: 0 },
+          position: 'relative', overflow: 'hidden', margin: 16, borderRadius: 16 },
   heroNav: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', marginBottom: 22 },
   logo: { fontSize: 19, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: -0.5 },
   navLinks: { display: 'flex', gap: 22 },
@@ -663,10 +661,10 @@ const s = {
   left: {}, center: {}, right: {},
   colLabel: { fontSize: 10, color: '#A89A82', margin: '0 0 10px', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' },
 
-  gridHeader: { display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 12 },
+  gridHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 },
+  searchInput: { padding: '8px 12px', fontSize: 12, border: '1px solid #E4DCCE', borderRadius: 8, background: '#fff', fontFamily: FONT, boxSizing: 'border-box', maxWidth: 300, minWidth: 200 },
   searchSectorRow: { display: 'flex', alignItems: 'center', gap: 8 },
-  searchInput: { flex: 1, padding: '8px 12px', fontSize: 12, border: '1px solid #E4DCCE', borderRadius: 8, background: '#fff', fontFamily: FONT, boxSizing: 'border-box' },
-  sectorWrap: { display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #E4DCCE', borderRadius: 8, padding: '5px 10px', whiteSpace: 'nowrap' },
+  sectorWrap: { display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #E4DCCE', borderRadius: 8, padding: '5px 10px' },
   sectorLabel: { fontSize: 11, color: '#A89A82', fontWeight: 500 },
   sectorSelect: { border: 'none', background: 'transparent', fontSize: 12, color: '#4A4236', fontWeight: 600, fontFamily: FONT, cursor: 'pointer', outline: 'none' },
 
