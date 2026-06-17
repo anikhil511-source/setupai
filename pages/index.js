@@ -361,6 +361,16 @@ export default function Home() {
           <div style={s.gridHeader}>
             <p style={{ ...s.colLabel, margin: 0 }}>Latest · tap to open</p>
             
+            {/* SEARCH BOX FIRST */}
+            <input
+              type="text"
+              placeholder="Search ticker, company, keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={s.searchInput}
+            />
+
+            {/* SECTOR FILTER SECOND */}
             <div style={s.sectorWrap}>
               <span style={s.sectorLabel}>Sector:</span>
               <select
@@ -373,15 +383,6 @@ export default function Home() {
                 ))}
               </select>
             </div>
-
-            {/* SEARCH BOX - positioned to the right */}
-            <input
-              type="text"
-              placeholder="Search ticker, company, keyword..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={s.searchInput}
-            />
           </div>
 
           {loading && <div style={s.muted}>Loading market intelligence…</div>}
