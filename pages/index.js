@@ -57,7 +57,7 @@ export default function Home() {
   const [hotOpen, setHotOpen] = useState(false);
   const [pendingCards, setPendingCards] = useState(null);
   const [newCount, setNewCount] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');  // NEW: search by ticker/company
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Apply search + sector + analyst filters
   const filtered = cards.filter((c) => {
@@ -212,7 +212,7 @@ export default function Home() {
       </Head>
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
 
-      {/* HERO (cleaned up - no extra background blob) */}
+      {/* HERO (no blob background, no extra padding) */}
       <section style={s.hero}>
         {/* Nav row inside the teal panel */}
         <div style={s.heroNav}>
@@ -221,6 +221,7 @@ export default function Home() {
             <Link href="/" style={{ ...s.navLink, color: '#fff', fontWeight: 700 }}>Home</Link>
             <Link href="/about" style={s.navLink}>About</Link>
             <Link href="/tools" style={s.navLink}>Tools</Link>
+            <Link href="/events" style={s.navLink}>Events</Link>
           </div>
           <button className="sai-burger" onClick={() => setMenuOpen(true)} style={s.burger} aria-label="Menu">☰</button>
         </div>
@@ -360,36 +361,28 @@ export default function Home() {
           <div style={s.gridHeader}>
             <p style={{ ...s.colLabel, margin: 0 }}>Latest · tap to open</p>
             
-            {/* SEARCH BAR (replaces red line) */}
-            <input
-              type="text"
-              placeholder="Search ticker, company, keyword..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                fontSize: 12,
-                border: '1px solid #E4DCCE',
-                borderRadius: 8,
-                background: '#fff',
-                fontFamily: "'Space Grotesk', sans-serif",
-                boxSizing: 'border-box',
-                maxWidth: 300,
-              }}
-            />
-            
-            <div style={s.sectorWrap}>
-              <span style={s.sectorLabel}>Sector:</span>
-              <select
-                value={sectorFilter}
-                onChange={(e) => setSectorFilter(e.target.value)}
-                style={s.sectorSelect}
-              >
-                {sectorOptions.map((sec) => (
-                  <option key={sec} value={sec}>{sec === 'All' ? 'All sectors' : sec}</option>
-                ))}
-              </select>
+            {/* SEARCH + SECTOR in one row */}
+            <div style={s.searchSectorRow}>
+              <input
+                type="text"
+                placeholder="Search ticker, company, keyword..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={s.searchInput}
+              />
+              
+              <div style={s.sectorWrap}>
+                <span style={s.sectorLabel}>Sector:</span>
+                <select
+                  value={sectorFilter}
+                  onChange={(e) => setSectorFilter(e.target.value)}
+                  style={s.sectorSelect}
+                >
+                  {sectorOptions.map((sec) => (
+                    <option key={sec} value={sec}>{sec === 'All' ? 'All sectors' : sec}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -632,11 +625,11 @@ function Metric({ t, label, value, small }) {
 // ================================ STYLES =====================================
 const FONT = "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif";
 const s = {
-  page: { fontFamily: FONT, background: '#FAF6EF', minHeight: '100vh', boxSizing: 'border-box' },
+  page: { fontFamily: FONT, background: '#FAF6EF', minHeight: '100vh', boxSizing: 'border-box', margin: 0, padding: 0 },
 
-  // CLEANED HERO - no extra blob background
+  // CLEANED HERO - no extra blue, single rectangular area
   hero: { background: 'linear-gradient(135deg, #0D5C6E 0%, #0B3038 100%)', padding: '18px 28px 32px',
-          position: 'relative', overflow: 'hidden', margin: 16, borderRadius: 16 },
+          position: 'relative', overflow: 'hidden', margin: 0, borderRadius: 0 },
   heroNav: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', marginBottom: 22 },
   logo: { fontSize: 19, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: -0.5 },
   navLinks: { display: 'flex', gap: 22 },
@@ -670,8 +663,10 @@ const s = {
   left: {}, center: {}, right: {},
   colLabel: { fontSize: 10, color: '#A89A82', margin: '0 0 10px', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' },
 
-  gridHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 },
-  sectorWrap: { display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #E4DCCE', borderRadius: 8, padding: '5px 10px' },
+  gridHeader: { display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 12 },
+  searchSectorRow: { display: 'flex', alignItems: 'center', gap: 8 },
+  searchInput: { flex: 1, padding: '8px 12px', fontSize: 12, border: '1px solid #E4DCCE', borderRadius: 8, background: '#fff', fontFamily: FONT, boxSizing: 'border-box' },
+  sectorWrap: { display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #E4DCCE', borderRadius: 8, padding: '5px 10px', whiteSpace: 'nowrap' },
   sectorLabel: { fontSize: 11, color: '#A89A82', fontWeight: 500 },
   sectorSelect: { border: 'none', background: 'transparent', fontSize: 12, color: '#4A4236', fontWeight: 600, fontFamily: FONT, cursor: 'pointer', outline: 'none' },
 

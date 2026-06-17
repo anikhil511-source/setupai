@@ -6,78 +6,14 @@ const FONT = "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif";
 
 // Static event data
 const EVENTS_DATA = [
-  {
-    id: 1,
-    title: 'RBI Policy Decision',
-    date: new Date(2026, 5, 24, 14, 30),
-    impact: 'High',
-    type: 'RBI Meetings',
-    description: 'The Reserve Bank of India announces its monetary policy decision.',
-    color: '#D85A30',
-  },
-  {
-    id: 2,
-    title: 'TCS Q1 FY27 Earnings',
-    date: new Date(2026, 5, 25, 16, 0),
-    impact: 'Medium',
-    type: 'Earnings',
-    description: 'Tata Consultancy Services reports Q1 earnings.',
-    color: '#BA7517',
-  },
-  {
-    id: 3,
-    title: 'US Fed Interest Rate Decision',
-    date: new Date(2026, 5, 26, 18, 30),
-    impact: 'High',
-    type: 'Global',
-    description: 'Federal Reserve announces its latest policy decision.',
-    color: '#00A37A',
-  },
-  {
-    id: 4,
-    title: 'Infosys Q1 FY27 Results',
-    date: new Date(2026, 5, 27, 10, 0),
-    impact: 'Medium',
-    type: 'Earnings',
-    description: 'Infosys reports Q1 results with FY27 guidance.',
-    color: '#BA7517',
-  },
-  {
-    id: 5,
-    title: 'HDFC Bank AGM',
-    date: new Date(2026, 5, 28, 15, 0),
-    impact: 'Low',
-    type: 'Corporate',
-    description: 'Annual General Meeting of shareholders.',
-    color: '#999',
-  },
-  {
-    id: 6,
-    title: 'ITC Q1 FY27 Earnings',
-    date: new Date(2026, 5, 30, 14, 30),
-    impact: 'Medium',
-    type: 'Earnings',
-    description: 'ITC reports Q1 earnings.',
-    color: '#BA7517',
-  },
-  {
-    id: 7,
-    title: 'SEBI Board Meeting',
-    date: new Date(2026, 6, 5, 10, 0),
-    impact: 'High',
-    type: 'RBI Meetings',
-    description: 'Securities and Exchange Board of India board meeting.',
-    color: '#D85A30',
-  },
-  {
-    id: 8,
-    title: 'Reliance Q1 Earnings',
-    date: new Date(2026, 6, 10, 14, 0),
-    impact: 'High',
-    type: 'Earnings',
-    description: 'Reliance Industries reports Q1 earnings.',
-    color: '#BA7517',
-  },
+  { id: 1, title: 'RBI Policy Decision', date: new Date(2026, 5, 24, 14, 30), impact: 'High', type: 'RBI Meetings', description: 'The Reserve Bank of India announces its monetary policy decision.', color: '#D85A30' },
+  { id: 2, title: 'TCS Q1 FY27 Earnings', date: new Date(2026, 5, 25, 16, 0), impact: 'Medium', type: 'Earnings', description: 'Tata Consultancy Services reports Q1 earnings.', color: '#BA7517' },
+  { id: 3, title: 'US Fed Interest Rate Decision', date: new Date(2026, 5, 26, 18, 30), impact: 'High', type: 'Global', description: 'Federal Reserve announces its latest policy decision.', color: '#00A37A' },
+  { id: 4, title: 'Infosys Q1 FY27 Results', date: new Date(2026, 5, 27, 10, 0), impact: 'Medium', type: 'Earnings', description: 'Infosys reports Q1 results with FY27 guidance.', color: '#BA7517' },
+  { id: 5, title: 'HDFC Bank AGM', date: new Date(2026, 5, 28, 15, 0), impact: 'Low', type: 'Corporate', description: 'Annual General Meeting of shareholders.', color: '#999' },
+  { id: 6, title: 'ITC Q1 FY27 Earnings', date: new Date(2026, 5, 30, 14, 30), impact: 'Medium', type: 'Earnings', description: 'ITC reports Q1 earnings.', color: '#BA7517' },
+  { id: 7, title: 'SEBI Board Meeting', date: new Date(2026, 6, 5, 10, 0), impact: 'High', type: 'RBI Meetings', description: 'Securities and Exchange Board of India board meeting.', color: '#D85A30' },
+  { id: 8, title: 'Reliance Q1 Earnings', date: new Date(2026, 6, 10, 14, 0), impact: 'High', type: 'Earnings', description: 'Reliance Industries reports Q1 earnings.', color: '#BA7517' },
 ];
 
 export default function Events() {
@@ -91,8 +27,8 @@ export default function Events() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [yearlyMonth, setYearlyMonth] = useState(null);
   const [showPastDates, setShowPastDates] = useState(false);
+  const [hoveredMiniMonth, setHoveredMiniMonth] = useState(null);
 
-  // Request notification permission on mount
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'granted') {
@@ -109,7 +45,6 @@ export default function Events() {
     }
   }, []);
 
-  // Schedule notifications 15 mins before each event
   const scheduleNotifications = () => {
     EVENTS_DATA.forEach((event) => {
       const timeTillEvent = event.date.getTime() - Date.now();
@@ -128,12 +63,10 @@ export default function Events() {
     });
   };
 
-  // Filter events by type
   const filteredEvents = selectedEventType === 'All Events'
     ? EVENTS_DATA
     : EVENTS_DATA.filter((e) => e.type === selectedEventType);
 
-  // Get next 6-7 events for the timeline
   const EVENTS_PER_PAGE = 6;
   const nextEvents = filteredEvents
     .sort((a, b) => a.date - b.date)
@@ -143,7 +76,6 @@ export default function Events() {
 
   const eventTypes = ['All Events', 'RBI Meetings', 'Earnings', 'Corporate', 'Global'];
 
-  // Calendar logic for current month
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const today = new Date();
@@ -151,12 +83,9 @@ export default function Events() {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Build weeks array
   const weeks = [];
   let currentWeek = [];
-  for (let i = 0; i < firstDay; i++) {
-    currentWeek.push(null);
-  }
+  for (let i = 0; i < firstDay; i++) currentWeek.push(null);
   for (let day = 1; day <= daysInMonth; day++) {
     currentWeek.push(day);
     if (currentWeek.length === 7) {
@@ -164,11 +93,8 @@ export default function Events() {
       currentWeek = [];
     }
   }
-  if (currentWeek.length > 0) {
-    weeks.push(currentWeek);
-  }
+  if (currentWeek.length > 0) weeks.push(currentWeek);
 
-  // Filter weeks: hide if all dates are past, show if row contains today or future
   const visibleWeeks = showPastDates ? weeks : weeks.filter((week) => {
     const hasCurrentOrFuture = week.some((day) => {
       if (!day) return false;
@@ -178,32 +104,20 @@ export default function Events() {
     return hasCurrentOrFuture;
   });
 
-  // Get events for the current month
   const monthEvents = filteredEvents.filter((e) => {
     return e.date.getFullYear() === year && e.date.getMonth() === month;
   });
 
-  const hasEvents = (day) => monthEvents.some((e) => e.date.getDate() === day);
   const getEventColor = (day) => {
     const dayEvents = monthEvents.filter((e) => e.date.getDate() === day);
     return dayEvents.length > 0 ? dayEvents[0].color : null;
   };
 
-  const getEventsByDate = (day) => {
-    return monthEvents.filter((e) => e.date.getDate() === day);
-  };
-
-  const prevMonth = () => {
-    setCurrentDate(new Date(year, month - 1));
-  };
-
-  const nextMonth = () => {
-    setCurrentDate(new Date(year, month + 1));
-  };
+  const prevMonth = () => setCurrentDate(new Date(year, month - 1));
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1));
 
   const monthName = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  // Weekly view data
   const getWeekDays = () => {
     const curr = new Date(currentDate);
     const first = curr.getDate() - curr.getDay();
@@ -217,20 +131,15 @@ export default function Events() {
 
   const weekDays = getWeekDays();
   const weekEvents = filteredEvents.filter((e) => {
-    return weekDays.some((d) => 
-      d.toDateString() === e.date.toDateString()
-    );
+    return weekDays.some((d) => d.toDateString() === e.date.toDateString());
   });
 
-  // Daily view data
   const dailyEvents = filteredEvents.filter((e) => {
     return e.date.toDateString() === currentDate.toDateString();
   });
 
-  // Yearly view - all 12 months with click interactions
   const renderYearlyCalendar = () => {
     if (yearlyMonth !== null) {
-      // Full month view from yearly
       const monthDate = new Date(year, yearlyMonth);
       const firstDayOfMonth = new Date(year, yearlyMonth, 1).getDay();
       const daysOfMonth = new Date(year, yearlyMonth + 1, 0).getDate();
@@ -248,9 +157,7 @@ export default function Events() {
           </div>
 
           <div style={s.calendarGridLarge}>
-            {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-              <div key={`empty-${i}`} />
-            ))}
+            {Array.from({ length: firstDayOfMonth }).map((_, i) => (<div key={`empty-${i}`} />))}
             {Array.from({ length: daysOfMonth }).map((_, i) => {
               const day = i + 1;
               const dayHasEvent = monthEventsData.some((e) => e.date.getDate() === day);
@@ -269,8 +176,6 @@ export default function Events() {
                 >
                   {day}
                   {eventColor && <div style={{ ...s.eventDotLarge, background: eventColor }} />}
-
-                  {/* Hover preview */}
                   {hoveredDate === `${year}-${yearlyMonth}-${day}` && dayEvents.length > 0 && (
                     <div style={s.hoverPreview}>
                       {dayEvents.map((evt) => (
@@ -288,7 +193,6 @@ export default function Events() {
       );
     }
 
-    // Yearly grid view
     const months = [];
     for (let m = 0; m < 12; m++) {
       const monthDate = new Date(year, m);
@@ -308,27 +212,28 @@ export default function Events() {
     return (
       <div style={s.yearlyGrid}>
         {months.map((m) => (
-          <div key={m.month} style={s.miniCalendar}>
-            <button
-              onClick={() => setYearlyMonth(m.month)}
-              style={s.miniMonthName}
-            >
-              {m.name} {year}
-            </button>
+          <div
+            key={m.month}
+            style={{
+              ...s.miniCalendar,
+              ...(hoveredMiniMonth === m.month ? s.miniCalendarHover : {}),
+            }}
+            onMouseEnter={() => setHoveredMiniMonth(m.month)}
+            onMouseLeave={() => setHoveredMiniMonth(null)}
+            onClick={() => setYearlyMonth(m.month)}
+          >
+            <div style={s.miniMonthName}>{m.name} {year}</div>
             <div style={s.miniDayHeaders}>
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
                 <div key={d} style={s.miniDayHeader}>{d}</div>
               ))}
             </div>
             <div style={s.miniCalendarGrid}>
-              {Array.from({ length: m.firstDay }).map((_, i) => (
-                <div key={`empty-${i}`} />
-              ))}
+              {Array.from({ length: m.firstDay }).map((_, i) => (<div key={`empty-${i}`} />))}
               {Array.from({ length: m.days }).map((_, i) => {
                 const day = i + 1;
                 const dayHasEvent = m.events.some((e) => e.date.getDate() === day);
                 const eventColor = dayHasEvent ? m.events.find((e) => e.date.getDate() === day)?.color : null;
-                const dayEvents = m.events.filter((e) => e.date.getDate() === day);
 
                 return (
                   <div
@@ -336,27 +241,10 @@ export default function Events() {
                     style={{
                       ...s.miniDay,
                       ...(eventColor ? { background: `${eventColor}20`, border: `0.5px solid ${eventColor}` } : {}),
-                      cursor: dayEvents.length > 0 ? 'pointer' : 'default',
                     }}
-                    onClick={() => {
-                      if (dayEvents.length > 0) {
-                        setSelectedEvent(dayEvents[0]);
-                      }
-                    }}
-                    onMouseEnter={() => {
-                      if (dayEvents.length > 0) setHoveredDate(`${year}-${m.month}-${day}`);
-                    }}
-                    onMouseLeave={() => setHoveredDate(null)}
                   >
                     {day}
                     {eventColor && <div style={{ ...s.miniEventDot, background: eventColor }} />}
-
-                    {/* Hover preview */}
-                    {hoveredDate === `${year}-${m.month}-${day}` && dayEvents.length > 0 && (
-                      <div style={s.miniHoverPreview}>
-                        {dayEvents[0].title.substring(0, 15)}...
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -367,9 +255,8 @@ export default function Events() {
     );
   };
 
-  // Weekly view render (Teams style)
   const renderWeeklyView = () => {
-    const hours = Array.from({ length: 16 }, (_, i) => i + 8); // 8 AM to 11 PM
+    const hours = Array.from({ length: 16 }, (_, i) => i + 8);
 
     return (
       <div style={s.weeklyContainer}>
@@ -382,7 +269,6 @@ export default function Events() {
         </div>
 
         <div style={s.weeklyGrid}>
-          {/* Time column */}
           <div style={s.timeColumn}>
             <div style={s.timeHeader}></div>
             {hours.map((hour) => (
@@ -392,7 +278,6 @@ export default function Events() {
             ))}
           </div>
 
-          {/* Day columns */}
           {weekDays.map((day, dayIdx) => (
             <div key={dayIdx} style={s.dayColumn}>
               <div style={s.dayHeader}>
@@ -432,9 +317,8 @@ export default function Events() {
     );
   };
 
-  // Daily view render (Teams style)
   const renderDailyView = () => {
-    const hours = Array.from({ length: 16 }, (_, i) => i + 8); // 8 AM to 11 PM
+    const hours = Array.from({ length: 16 }, (_, i) => i + 8);
 
     return (
       <div style={s.dailyContainer}>
@@ -492,7 +376,6 @@ export default function Events() {
       </Head>
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
 
-      {/* NAV */}
       <nav style={s.nav}>
         <Link href="/" style={s.logo}>setup<span style={{ color: '#00C896' }}>ai</span></Link>
         <div className="desktop-nav" style={s.navLinks}>
@@ -504,7 +387,6 @@ export default function Events() {
         <button className="burger-menu" onClick={() => setMenuOpen(!menuOpen)} style={s.burger} aria-label="Menu">☰</button>
       </nav>
 
-      {/* MOBILE MENU */}
       {menuOpen && (
         <div style={s.mobileMenu}>
           <Link href="/" style={s.mobileLink}>Home</Link>
@@ -514,9 +396,7 @@ export default function Events() {
         </div>
       )}
 
-      {/* MAIN LAYOUT */}
       <div style={s.container}>
-        {/* LEFT SIDEBAR — Events Timeline */}
         <aside style={s.sidebar}>
           <h3 style={s.sidebarTitle}>Events</h3>
           <div style={s.timeline}>
@@ -524,10 +404,8 @@ export default function Events() {
               <p style={s.emptyText}>No events in this filter.</p>
             ) : (
               <div style={{ position: 'relative' }}>
-                {/* Vertical timeline line */}
                 <div style={s.timelineVerticalLine} />
-                
-                {nextEvents.map((event, idx) => (
+                {nextEvents.map((event) => (
                   <div key={event.id} style={s.timelineEvent}>
                     <div style={{ ...s.timelineDot, background: event.color }} />
                     <div>
@@ -543,7 +421,6 @@ export default function Events() {
             )}
           </div>
 
-          {/* Previous/Next for events - Card style */}
           {totalEventPages > 1 && (
             <div style={s.eventPaginationCard}>
               <button
@@ -571,7 +448,6 @@ export default function Events() {
 
           <div style={s.pageInfo}>{eventPage + 1} of {totalEventPages}</div>
 
-          {/* Notification toggle */}
           <label style={s.notificationToggle}>
             <input
               type="checkbox"
@@ -585,11 +461,9 @@ export default function Events() {
           </label>
         </aside>
 
-        {/* CENTER/RIGHT — Calendar */}
         <main style={s.main}>
           <h1 style={s.pageTitle}>Market Events Calendar</h1>
 
-          {/* Event Type Filters */}
           <div style={s.filterRow}>
             {eventTypes.map((type) => (
               <button
@@ -610,7 +484,6 @@ export default function Events() {
             ))}
           </div>
 
-          {/* View Controls */}
           <div style={s.viewControls}>
             <span style={s.viewLabel}>View:</span>
             {['Daily', 'Weekly', 'Monthly', 'Yearly'].map((v) => (
@@ -630,44 +503,54 @@ export default function Events() {
             <span style={s.untilText}>Until 31 Mar 2027</span>
           </div>
 
-          {/* DAILY VIEW */}
           {view === 'Daily' && (
             <div style={s.calendarBox}>
               {renderDailyView()}
             </div>
           )}
 
-          {/* WEEKLY VIEW */}
           {view === 'Weekly' && (
             <div style={s.calendarBox}>
               {renderWeeklyView()}
             </div>
           )}
 
-          {/* YEARLY VIEW */}
           {view === 'Yearly' && (
             <div style={s.calendarBox}>
               {renderYearlyCalendar()}
             </div>
           )}
 
-          {/* MONTHLY VIEW */}
           {view === 'Monthly' && (
             <div style={s.calendarBox}>
               <div style={s.monthNav}>
                 <button onClick={prevMonth} style={s.navBtn}>←</button>
                 <h2 style={s.monthName}>{monthName}</h2>
                 <button onClick={nextMonth} style={s.navBtn}>→</button>
-                <button 
-                  onClick={() => setShowPastDates(!showPastDates)}
-                  style={s.toggleIcon} 
-                  title="View full month"
+              </div>
+
+              {/* Calendar navigation buttons - card style horizontal row */}
+              <div style={s.calendarNavRow}>
+                <button
+                  onClick={() => setShowPastDates(false)}
+                  style={{
+                    ...s.calendarNavBtn,
+                    ...(showPastDates ? s.calendarNavBtnInactive : s.calendarNavBtnActive)
+                  }}
                 >
-                  ⊕
+                  ← Hide Past
+                </button>
+                <button
+                  onClick={() => setShowPastDates(true)}
+                  style={{
+                    ...s.calendarNavBtn,
+                    ...(showPastDates ? s.calendarNavBtnActive : s.calendarNavBtnInactive)
+                  }}
+                >
+                  Show Full ⊕
                 </button>
               </div>
 
-              {/* Day headers with toggle icon on right of Sat */}
               <div style={s.dayHeaders}>
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((d) => (
                   <div key={d} style={s.dayHeader}>{d}</div>
@@ -677,7 +560,6 @@ export default function Events() {
                 </div>
               </div>
 
-              {/* Calendar grid - only visible weeks */}
               <div style={s.calendarGrid}>
                 {visibleWeeks.map((week, weekIdx) => (
                   <div key={weekIdx} style={s.weekRow}>
@@ -712,7 +594,6 @@ export default function Events() {
         </main>
       </div>
 
-      {/* Event detail popup */}
       {selectedEvent && (
         <div style={s.eventPopup}>
           <div style={s.eventPopupContent}>
@@ -727,7 +608,6 @@ export default function Events() {
         </div>
       )}
 
-      {/* FOOTER */}
       <footer style={s.footer}>
         <span>© {new Date().getFullYear()} <span style={{ fontWeight: 700 }}>setup<span style={{ color: '#00C896' }}>ai</span></span> · setupai.in</span>
         <div style={s.footerLinks}>
@@ -801,7 +681,11 @@ const s = {
   monthNav: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 12 },
   navBtn: { background: 'transparent', border: 'none', fontSize: 18, cursor: 'pointer', color: '#0D5C6E', fontWeight: 700 },
   monthName: { margin: 0, fontSize: 18, fontWeight: 700, color: '#333', flex: 1, textAlign: 'center' },
-  toggleIcon: { background: 'transparent', border: 'none', fontSize: 16, cursor: 'pointer', color: '#0D5C6E', fontWeight: 700, padding: 0 },
+
+  calendarNavRow: { display: 'flex', gap: 8, marginBottom: 14 },
+  calendarNavBtn: { flex: 1, padding: '10px 14px', fontSize: 12, border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: FONT, fontWeight: 700, transition: 'all 0.2s ease' },
+  calendarNavBtnActive: { background: '#0D5C6E', color: '#fff' },
+  calendarNavBtnInactive: { background: '#E0E0E0', color: '#999' },
 
   dayHeaders: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginBottom: 10, textAlign: 'center' },
   dayHeader: { fontSize: 11, fontWeight: 700, color: '#666' },
@@ -814,7 +698,6 @@ const s = {
   dayNumber: { fontSize: 12, fontWeight: 600, color: '#333' },
   eventDot: { width: 6, height: 6, borderRadius: '50%', marginTop: 3 },
 
-  // Weekly view styles
   weeklyContainer: { padding: '16px' },
   weeklyHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
   weekDateRange: { fontSize: 16, fontWeight: 700, color: '#333' },
@@ -833,7 +716,6 @@ const s = {
   eventBlockTitle: { margin: '0 0 2px', fontSize: 10, fontWeight: 600 },
   eventBlockTime: { margin: 0, fontSize: 9 },
 
-  // Daily view styles
   dailyContainer: { padding: '16px' },
   dailyHeader: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 20 },
   dailyDateTitle: { margin: 0, fontSize: 20, fontWeight: 700, color: '#333', flex: 1, textAlign: 'center' },
@@ -847,16 +729,15 @@ const s = {
   eventBlockTitleDaily: { margin: '0 0 2px', fontSize: 10, fontWeight: 600 },
   eventBlockTimeDaily: { margin: 0, fontSize: 9 },
 
-  // Yearly view styles
   yearlyGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 },
-  miniCalendar: { background: '#f9f9f9', border: '1px solid #e0e0e0', borderRadius: 8, padding: 10 },
-  miniMonthName: { width: '100%', margin: 0, padding: '6px', fontSize: 12, fontWeight: 700, color: '#0D5C6E', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'center', marginBottom: 6 },
+  miniCalendar: { background: '#f9f9f9', border: '1px solid #e0e0e0', borderRadius: 8, padding: 10, cursor: 'pointer', transition: 'all 0.2s ease' },
+  miniCalendarHover: { transform: 'scale(1.05)', boxShadow: '0 8px 20px rgba(0,0,0,0.12)', borderColor: '#0D5C6E' },
+  miniMonthName: { width: '100%', margin: 0, padding: '6px', fontSize: 12, fontWeight: 700, color: '#0D5C6E', textAlign: 'center', marginBottom: 6 },
   miniDayHeaders: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3, marginBottom: 5 },
   miniDayHeader: { fontSize: 9, fontWeight: 600, color: '#666', textAlign: 'center' },
   miniCalendarGrid: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 },
   miniDay: { aspectRatio: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 500, color: '#333', background: '#fff', border: '0.5px solid #e0e0e0', borderRadius: 3, position: 'relative' },
   miniEventDot: { width: 3, height: 3, borderRadius: '50%', marginTop: 1 },
-  miniHoverPreview: { position: 'absolute', bottom: '-20px', left: '50%', transform: 'translateX(-50%)', background: '#333', color: '#fff', padding: '4px 8px', borderRadius: 4, fontSize: 9, whiteSpace: 'nowrap', zIndex: 10 },
 
   hoverPreview: { position: 'absolute', top: '-60px', left: '50%', transform: 'translateX(-50%)', background: '#333', color: '#fff', padding: '8px 12px', borderRadius: 6, fontSize: 11, zIndex: 10, minWidth: '150px' },
 
